@@ -3,7 +3,7 @@ class Service:
         self.containers = []
         self.hostname = ""
         self.kind = ""
-        self.labels = []
+        self.labels = {}
         self.metadata = {}
         self.name = ""
         self.ports = []
@@ -14,3 +14,15 @@ class Service:
 
     def add_port(self, port):
         self.ports.append(port)
+
+    def add_labels(self, key, value):
+        if key in self.labels:
+            self.labels[key].append(value)
+        else:
+            self.labels[key] = value
+
+    def add_metadata(self, key, value):
+        if key in self.metadata:
+            self.metadata[key].append(value)
+        else:
+            self.metadata[key] = value
