@@ -3,6 +3,7 @@ class Host:
         self.agent_ip = ""
         self.name = ""
         self.labels = {}
+        self.uuid = ""
 
     def add_labels(self,key, value):
         if key in self.labels:

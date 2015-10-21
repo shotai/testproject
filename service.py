@@ -1,7 +1,6 @@
 class Service:
     def __init__(self):
         self.containers = []
-        self.external_ips = []
         self.hostname = ""
         self.kind = ""
         self.labels = []
@@ -12,7 +11,6 @@ class Service:
 
     def add_container(self, name):
         self.containers.append(name)
-
 
     def add_port(self, port):
         self.ports.append(port)
