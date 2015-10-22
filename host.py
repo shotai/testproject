@@ -3,11 +3,15 @@ class Host:
         self.agent_ip = ""
         self.name = ""
         self.labels = {}
-        self.uuid = ""
+        self.port = 0
+        self.dc = ""
 
-    def add_labels(self,key, value):
-        if key in self.labels:
-            self.labels[key].append(value)
-        else:
-            self.labels[key] = value
+    def print_host(self):
+        print(self.agent_ip+" "+self.port+" "+self.name)
+
+    # def add_labels(self, key, value):
+    #     if key in self.labels:
+    #         self.labels[key].append(value)
+    #     else:
+    #         self.labels[key] = [value]
 
