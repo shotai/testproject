@@ -83,9 +83,6 @@ def main():
     register_host.port = gateway_service.ports[0].split(":")[0]
     register_host.dc = "dc1"
 
-    # register_services = []
-    # curr_registered_services = []
-
     d = threading.Thread(name='daemon', target=start_register2(gateway_services_name, [], register_host))
     d.setDaemon(True)
     d.start()
