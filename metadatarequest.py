@@ -40,9 +40,9 @@ class MetadataRequest:
         tmp_service.stack_name = res['stack_name']
         tmp_service.ports = res['ports']
         tmp_service.labels = res['labels']
-        tmp_service.links = res['links']
-        # for k, v in res['links'].items():
-        #     tmp_service.links.append(k.split("/")[1])
+        #tmp_service.links = res['links']
+        for k, v in res['links'].items():
+            tmp_service.links.append(k.split("/")[1])
 
         return tmp_service
 
@@ -60,9 +60,9 @@ class MetadataRequest:
         tmp_service.stack_name = res['stack_name']
         tmp_service.ports = res['ports']
         tmp_service.labels = res['labels']
-        tmp_service.links = res['links']
-        # for k, v in res['links'].items():
-        #     tmp_service.links.append(k.split("/")[1])
+        #tmp_service.links = res['links']
+        for k, v in res['links'].items():
+            tmp_service.links.append(k.split("/")[1])
 
         return tmp_service
 

@@ -8,7 +8,7 @@ class Service:
         self.name = ""
         self.ports = []
         self.stack_name = ""
-        self.links = {}
+        self.links = []
         self.tags = []
         self.address = ""
 
