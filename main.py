@@ -27,8 +27,6 @@ def start_register(gateway_services_name, register_host):
                 consulrequest.Register.deregister_service(i, register_host, consul_url)
         curr_registered_services = register_services
 
-        for s in register_services:
-            print(s)
         time.sleep(5)
 
 
