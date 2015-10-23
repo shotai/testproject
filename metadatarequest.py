@@ -20,9 +20,9 @@ class MetadataRequest:
                            headers={"Accept": "application/json"})
         res = res.json()
         tmp_service = service.Service()
+        tmp_service.containers = res['containers']
         tmp_service.name = res['name']
         tmp_service.hostname = res['hostname']
-        tmp_service.metadata = res['metadata']
         tmp_service.kind = res['kind']
         tmp_service.stack_name = res['stack_name']
         tmp_service.ports = res['ports']
@@ -41,11 +41,11 @@ class MetadataRequest:
         tmp_service = service.Service()
         tmp_service.name = res['name']
         tmp_service.hostname = res['hostname']
-        tmp_service.metadata = res['metadata']
         tmp_service.kind = res['kind']
         tmp_service.stack_name = res['stack_name']
         tmp_service.ports = res['ports']
         tmp_service.labels = res['labels']
+        tmp_service.containers = res['containers']
         #tmp_service.links = res['links']
         for k, v in res['links'].items():
             tmp_service.links.append(k.split("/")[1])
