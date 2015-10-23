@@ -17,8 +17,7 @@ class Register:
                    }}
         url = consul_url + "/v1/catalog/register"
         r = requests.post(url, json=payload)
-        print("register_service")
-        print(r.text)
+        print("register_service: " + service.print_service() + "result: " + r.text)
 
     @staticmethod
     def deregister_service(service_id, host, consul_url):
@@ -27,6 +26,5 @@ class Register:
                    "ServiceID": service_id}
         url = consul_url + "/v1/catalog/deregister"
         r = requests.post(url, json=payload)
-        print("deregister_service")
-        print(r.text)
+        print("deregister_service: " + service_id + "result: " + r.text)
 

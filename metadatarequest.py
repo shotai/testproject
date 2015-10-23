@@ -19,7 +19,6 @@ class MetadataRequest:
         res = requests.get(url="http://rancher-metadata/2015-07-25/services/"+name,
                            headers={"Accept": "application/json"})
         res = res.json()
-        print(res)
         tmp_service = service.Service()
         tmp_service.name = res['name']
         tmp_service.hostname = res['hostname']
@@ -39,7 +38,6 @@ class MetadataRequest:
         res = requests.get(url="http://rancher-metadata/2015-07-25/self/service",
                            headers={"Accept": "application/json"})
         res = res.json()
-        print(res)
         tmp_service = service.Service()
         tmp_service.name = res['name']
         tmp_service.hostname = res['hostname']

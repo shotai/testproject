@@ -1,7 +1,7 @@
 import metadatarequest
 import os
 import service
-import register
+import consulrequest
 import threading
 import time
 
@@ -19,12 +19,12 @@ def start_register(gateway_services_name, register_host):
                     tmp_service.name = label_key.split(".")[-1]
                     tmp_service.tags.append(label_value.split("=")[0])
                     tmp_service.stack_name = gateway_service.stack_name
-                    register.Register.register_service(tmp_service, register_host, consul_url)
+                    consulrequest.Register.register_service(tmp_service, register_host, consul_url)
                 register_services.append(tmp_service_name)
 
         for i in curr_registered_services:
             if i not in register_services:
-                register.Register.deregister_service(i, register_host, consul_url)
+                consulrequest.Register.deregister_service(i, register_host, consul_url)
         curr_registered_services = register_services
 
         for s in register_services:
@@ -42,13 +42,12 @@ def start_register2(gateway_services_name, register_host):
             if tmp_service_name not in curr_registered_services:
                 tmp_service = metadatarequest.MetadataRequest.get_other_service(link_service)
                 tmp_service.tags.append(tmp_service.labels['location'])
-                register.Register.register_service(tmp_service, register_host, consul_url)
+                consulrequest.Register.register_service(tmp_service, register_host, consul_url)
             register_services.append(tmp_service_name)
 
         for i in curr_registered_services:
             if i not in register_services:
-                print("Deregister Service: "+i)
-                register.Register.deregister_service(i, register_host, consul_url)
+                consulrequest.Register.deregister_service(i, register_host, consul_url)
         curr_registered_services = register_services
 
         time.sleep(5)

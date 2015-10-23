@@ -13,6 +13,6 @@ class Service:
         self.address = ""
 
     def print_service(self):
-        print("SERVICE: " + self.name+"/" + self.stack_name + " TAGS:" + " ".join(self.tags))
+        print("SERVICE: " + self.stack_name+"/" + self.name + " TAGS:" + " ".join(self.tags))
 
 
