@@ -6,7 +6,7 @@ import threading
 import time
 
 
-def start_register(gateway_services_name, register_host):
+def start_register(gateway_services_name, register_host, consul_url):
     curr_registered_services = []
     while True:
         register_services = []
@@ -30,7 +30,7 @@ def start_register(gateway_services_name, register_host):
         time.sleep(5)
 
 
-def start_register2(gateway_services_name, register_host):
+def start_register2(gateway_services_name, register_host, consul_url):
     curr_registered_services = []
     while True:
         register_services = []
@@ -52,7 +52,6 @@ def start_register2(gateway_services_name, register_host):
 
 
 def main():
-    global consul_url
     consul_url = os.environ.get("CONSUL", "http://localhost:8500")
     data_center = os.environ.get("DATACENTER", "dc1")
     gateway_services_name = metadatarequest.MetadataRequest.get_self_service().links[0]
@@ -61,7 +60,7 @@ def main():
     register_host.port = gateway_service.ports[0].split(":")[0]
     register_host.dc = data_center
 
-    d = threading.Thread(name='daemon', target=start_register2(gateway_services_name, register_host))
+    d = threading.Thread(name='daemon', target=start_register2(gateway_services_name, register_host, consul_url))
     d.setDaemon(True)
     d.start()
 
