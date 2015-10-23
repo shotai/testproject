@@ -67,8 +67,6 @@ def main():
     d.setDaemon(True)
     d.start()
 
-    register_host.print_host()
-
     v = input("press any key to exit.")
 
 

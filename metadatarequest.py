@@ -12,6 +12,7 @@ class MetadataRequest:
         tmp_host.agent_ip = res['agent_ip']
         tmp_host.name = res['name']
         tmp_host.labels = res['labels']
+        tmp_host.print_host()
         return tmp_host
 
     @staticmethod
