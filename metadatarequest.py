@@ -1,5 +1,4 @@
 import requests
-import stack
 import host
 import service
 
@@ -14,17 +13,6 @@ class MetadataRequest:
         tmp_host.name = res['name']
         tmp_host.labels = res['labels']
         return tmp_host
-
-    @staticmethod
-    def get_stack():
-        res = requests.get(url="http://rancher-metadata/2015-07-25/self/stack",
-                           headers={"Accept": "application/json"})
-        res = res.json()
-        tmp_stack = stack.Stack()
-        tmp_stack.name = res['name']
-        tmp_stack.environment_name = res['environment_name']
-        tmp_stack.services = res['services']
-        return tmp_stack
 
     @staticmethod
     def get_other_service(name):

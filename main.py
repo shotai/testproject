@@ -6,20 +6,10 @@ import threading
 import time
 
 
-
-
-def get_register_service_tag(name):
-    service1 = metadatarequest.MetadataRequest.get_other_service(name)
-    try:
-        service1.tags.append(service1.labels["location"])
-        service1.tags.append(service1.labels['color'])
-    except KeyError:
-        pass
-    return service
-
-
-def start_register(gateway_services_name, curr_registered_services, register_services, register_host):
+def start_register(gateway_services_name, register_host):
+    curr_registered_services = []
     while True:
+        register_services = []
         gateway_service = metadatarequest.MetadataRequest.get_other_service(gateway_services_name)
         for label_key, label_value in gateway_service.labels.items():
             if label_key.startswith("io.rancher.loadbalancer.target"):
@@ -42,7 +32,8 @@ def start_register(gateway_services_name, curr_registered_services, register_ser
         time.sleep(5)
 
 
-def start_register2(gateway_services_name, curr_registered_services, register_host):
+def start_register2(gateway_services_name, register_host):
+    curr_registered_services = []
     while True:
         register_services = []
         gateway_service = metadatarequest.MetadataRequest.get_other_service(gateway_services_name)
@@ -65,17 +56,15 @@ def start_register2(gateway_services_name, curr_registered_services, register_ho
 
 def main():
     global consul_url
-    consul_url = os.environ["CONSUL"]
-    if not consul_url:
-        print("Cannot find consul url")
-        return
+    consul_url = os.environ.get("CONSUL", "http://localhost:8500")
+    data_center = os.environ.get("DATACENTER", "dc1")
     gateway_services_name = metadatarequest.MetadataRequest.get_self_service().links[0]
     gateway_service = metadatarequest.MetadataRequest.get_other_service(gateway_services_name)
     register_host = metadatarequest.MetadataRequest.get_host()
     register_host.port = gateway_service.ports[0].split(":")[0]
-    register_host.dc = "dc1"
+    register_host.dc = data_center
 
-    d = threading.Thread(name='daemon', target=start_register2(gateway_services_name, [], register_host))
+    d = threading.Thread(name='daemon', target=start_register2(gateway_services_name, register_host))
     d.setDaemon(True)
     d.start()
 
