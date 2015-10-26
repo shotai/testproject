@@ -1,7 +1,7 @@
 import requests
 
 
-class Register:
+class ConsulRequest:
 
     @staticmethod
     def register_service(service, host, consul_url):
