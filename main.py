@@ -39,8 +39,9 @@ def start_register2(gateway_services_name, register_host, consul_url):
             tmp_service_name = gateway_service.stack_name+'/'+link_service
             if tmp_service_name not in curr_registered_services:
                 tmp_service = metadatarequest.MetadataRequest.get_other_service(link_service)
-                tmp_service.tags.append(tmp_service.labels['location'])
-                consulrequest.ConsulRequest.register_service(tmp_service, register_host, consul_url)
+                for loc in tmp_service.labels['location'].split(","):		
+                    tmp_service.tags.append(loc)
+                    consulrequest.ConsulRequest.register_service(tmp_service, register_host, consul_url)
             register_services.append(tmp_service_name)
 
         for i in curr_registered_services:
