@@ -77,11 +77,12 @@ def main():
     consul_url = os.environ.get("CONSUL", "http://localhost:8500")
     data_center = os.environ.get("DATACENTER", "dc1")
     register_mode = os.environ.get("MODE", "agent")
+    gateway_services_name = os.environ.get("GATEWAY", "gateway")
     mode_switcher = {
         "agent": start_agent_register,
         "link": start_link_register,
         "label": start_label_register}
-    gateway_services_name = metadatarequest.MetadataRequest.get_self_service().links[0]
+    #gateway_services_name = metadatarequest.MetadataRequest.get_self_service().links[0]
     gateway_service = metadatarequest.MetadataRequest.get_other_service(gateway_services_name)
     register_host = metadatarequest.MetadataRequest.get_host()
     register_host.port = gateway_service.ports[0].split(":")[0]
