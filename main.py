@@ -8,6 +8,7 @@ import time
 
 def start_label_register(gateway_services_name, register_host, consul_url):
     curr_registered_services = []
+    print("start label register")
     while True:
         register_services = []
         gateway_service = metadatarequest.MetadataRequest.get_other_service(gateway_services_name)
@@ -32,6 +33,7 @@ def start_label_register(gateway_services_name, register_host, consul_url):
 
 def start_link_register(gateway_services_name, register_host, consul_url):
     curr_registered_services = []
+    print("start link register")
     while True:
         register_services = []
         gateway_service = metadatarequest.MetadataRequest.get_other_service(gateway_services_name)
@@ -53,6 +55,7 @@ def start_link_register(gateway_services_name, register_host, consul_url):
 
 def start_agent_register(gateway_services_name, register_host, consul_url):
     curr_registered_services = []
+    print("start agent register")
     while True:
         register_services = []
         gateway_service = metadatarequest.MetadataRequest.get_other_service(gateway_services_name)
