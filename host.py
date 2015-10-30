@@ -7,6 +7,4 @@ class Host:
         self.dc = ""
 
     def print_host(self):
-        print("HOST: " + self.agent_ip+":"+str(self.port)+" "+self.name)
-
-
+        print("HOST: " + self.agent_ip+":"+str(self.port)+" NAME: "+self.name)

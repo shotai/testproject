@@ -1,6 +1,7 @@
 import requests
 import host
 import service
+import stack
 
 
 class MetadataRequest:
@@ -52,6 +53,21 @@ class MetadataRequest:
             tmp_service.links.append(k.split("/")[1])
 
         return tmp_service
+
+    @staticmethod
+    def get_self_stack():
+        res = requests.get(url="http://rancher-metadata/2015-07-25/self/stack",
+                           headers={"Accept": "application/json"})
+        res = res.json()
+        tmp_stack = stack.Stack()
+        tmp_stack.name = res['name']
+        for i in res['services']:
+            tmp_stack.services.append(i)
+
+        return tmp_stack
+
+
+
 
 
 

@@ -4,7 +4,7 @@ import requests
 class ConsulRequest:
 
     @staticmethod
-    def register_service(service, host, consul_url):
+    def remote_register_service(service, host, consul_url):
         payload = {"Datacenter": host.dc,
                    "Node": host.name,
                    "Address": host.agent_ip,
@@ -18,10 +18,10 @@ class ConsulRequest:
         url = consul_url + "/v1/catalog/register"
         r = requests.post(url, json=payload)
         service.print_service()
-        print("register_service: " + service.stack_name+'/'+service.name + "result: " + r.text)
+        print("Remote Register Service: " + service.stack_name+'/'+service.name + ", Result: " + r.text)
 
     @staticmethod
-    def register_agent_service(service, host, consul_url):
+    def agent_register_service(service, host, consul_url):
         payload = {
                    "ID": service.stack_name+'/'+service.name,
                    "Name": service.name,
@@ -32,20 +32,20 @@ class ConsulRequest:
         url = consul_url + "/v1/agent/service/register"
         r = requests.post(url, json=payload)
         service.print_service()
-        print("register_service: " + service.stack_name+'/'+service.name + "result: " + r.text)
+        print("Agent Register Service: " + service.stack_name+'/'+service.name + ", Result: " + r.text)
 
     @staticmethod
-    def deregister_service(service_id, host, consul_url):
+    def remote_deregister_service(service_id, host, consul_url):
         payload = {"Datacenter": host.dc,
                    "Node": host.name,
                    "ServiceID": service_id}
         url = consul_url + "/v1/catalog/deregister"
         r = requests.post(url, json=payload)
-        print("deregister_service: " + service_id + "result: " + r.text)
+        print("Remote Deregister Service: " + service_id + ", Result: " + r.text)
 
     @staticmethod
-    def deregister_agent_service(service_id, consul_url):
+    def agent_deregister_service(service_id, consul_url):
         url = consul_url + "/v1/agent/service/deregister/"+service_id
         r = requests.post(url)
-        print("deregister_service: " + service_id + "result: " + r.text)
+        print("Agent Deregister Service: " + service_id + ", Result: " + r.text)
 
