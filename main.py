@@ -1,9 +1,12 @@
+import concurrent.futures
 import metadatarequest
 import os
+from multiprocessing import Pool
 import service
 import consulrequest
 import threading
 import time
+
 
 
 def start_label_register(gateway_services_name, register_host, consul_url):
@@ -73,6 +76,7 @@ def start_link_register(gateway_services_name, register_host, consul_url, is_rem
 
 def register_to_consul(services_name, stack_name, curr_registered_services, register_host, consul_url, label_name,
                        register_method):
+    print(curr_registered_services)
     register_services = []
     for link_service in services_name:
         tmp_service_name = stack_name + '/' + link_service
@@ -82,6 +86,7 @@ def register_to_consul(services_name, stack_name, curr_registered_services, regi
                 for label in tmp_service.labels[label_name].split(','):
                     if label_name == "tcpport":
                         register_host.port = label
+                        tmp_service.name += "_"+label
                     tmp_service.tags.append(label)
                     register_method(tmp_service, register_host, consul_url)
             except KeyError:
@@ -205,12 +210,17 @@ def main():
     register_host.port = gateway_service.ports[0].split(":")[0]
     register_host.dc = data_center
 
+    modes = register_mode.split(",")
+    executor = concurrent.futures.Executor(max_workers=len(modes))
 
     for i in register_mode.split(","):
         mode = mode_switcher.get(i, start_agent_link_register)
-        threading.Thread(name=register_mode,
-                         target=mode(gateway_services_name, register_host, consul_url),
-                         daemon=True).start()
+        print(i)
+        executor.submit(mode, gateway_services_name, register_host, consul_url)
+        # threading.Thread(name=i,
+        #                  target=mode(gateway_services_name, register_host, consul_url),
+        #                  daemon=True).start()
+
 
     v = input("press any key to exit.")
 
