@@ -1,12 +1,9 @@
 import concurrent.futures
 import metadatarequest
 import os
-from multiprocessing import Pool
 import service
 import consulrequest
-import threading
 import time
-
 
 
 def start_label_register(gateway_services_name, register_host, consul_url):
