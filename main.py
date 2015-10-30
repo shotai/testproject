@@ -73,7 +73,7 @@ def start_link_register(gateway_services_name, register_host, consul_url, is_rem
 
 def register_to_consul(services_name, stack_name, curr_registered_services, register_host, consul_url, label_name,
                        register_method):
-    print(curr_registered_services)
+    # print(curr_registered_services)
     register_services = []
     for link_service in services_name:
         tmp_service_name = stack_name + '/' + link_service
@@ -217,7 +217,6 @@ def main():
         # threading.Thread(name=i,
         #                  target=mode(gateway_services_name, register_host, consul_url),
         #                  daemon=True).start()
-
 
     v = input("press any key to exit.")
 
