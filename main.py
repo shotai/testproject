@@ -83,7 +83,7 @@ def register_to_consul(services_name, stack_name, curr_registered_services, regi
                     tmp_service.tags.append(label)
                     register_method(tmp_service, register_host, consul_url)
             except KeyError:
-                print("No " + label_name + " label in " + tmp_service + ", skipped.")
+                print("No " + label_name + " label in " + tmp_service_name + ", skipped.")
                 continue
         register_services.append(tmp_service_name)
 
