@@ -211,7 +211,7 @@ def main():
     register_host.dc = data_center
 
     modes = register_mode.split(",")
-    executor = concurrent.futures.Executor(max_workers=len(modes))
+    executor = concurrent.futures.ThreadPoolExecutor(max_workers=len(modes))
 
     for i in register_mode.split(","):
         mode = mode_switcher.get(i, start_agent_link_register)
