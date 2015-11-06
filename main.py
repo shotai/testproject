@@ -1,9 +1,9 @@
 import concurrent.futures
-import metadatarequest
 import os
+import time
 import service
 import consulrequest
-import time
+import metadatarequest
 
 
 def start_label_register(gateway_services_name, register_host, consul_url):
@@ -51,17 +51,10 @@ def start_link_register(gateway_services_name, register_host, consul_url, is_rem
         deregister_method = consulrequest.ConsulRequest.agent_deregister_service
 
     while True:
-        # register_services = []
         gateway_service = metadatarequest.MetadataRequest.get_other_service(gateway_services_name)
         register_services = register_to_consul(gateway_service.links, gateway_service.stack_name,
                                                curr_registered_services, register_host,
                                                consul_url, "location", register_method)
-        # for link_service in gateway_service.links:
-        #     tmp_service_name = gateway_service.stack_name + '/' + link_service
-        #     if tmp_service_name not in curr_registered_services:
-        #         tmp_service = metadatarequest.MetadataRequest.get_other_service(link_service)
-        #         register_to_consul(tmp_service, register_host, consul_url, "location", register_method)
-        #     register_services.append(tmp_service_name)
 
         for i in curr_registered_services:
             if i not in register_services:
@@ -73,7 +66,7 @@ def start_link_register(gateway_services_name, register_host, consul_url, is_rem
 
 def register_to_consul(services_name, stack_name, curr_registered_services, register_host, consul_url, label_name,
                        register_method):
-    # print(curr_registered_services)
+
     register_services = []
     for link_service in services_name:
         tmp_service_name = stack_name + '/' + link_service
@@ -82,71 +75,26 @@ def register_to_consul(services_name, stack_name, curr_registered_services, regi
             try:
                 for label in tmp_service.labels[label_name].split(','):
                     if label_name == "tcpport":
-                        register_host.port = label
-                        tmp_service.name += "_"+label
-                    tmp_service.tags.append(label)
-                    register_method(tmp_service, register_host, consul_url)
+                        tmp_service.tcp_port.append(label)
+                    if label_name == "location":
+                        tmp_service.location.append(label)
+                    # tmp_service.tags.append(label)
+
             except KeyError:
-                # print("No " + label_name + " label in " + tmp_service_name + ", skipped.")
                 continue
-        register_services.append(tmp_service_name)
+            register_services.extend(register_method(tmp_service, register_host, consul_url))
+        else:
+            register_services.append(tmp_service_name)
 
     return register_services
 
 
 def start_tcp_stack_agent_register(gateway_services_name, register_host, consul_url):
     start_tcp_agent_register(register_host, consul_url, False)
-    # curr_registered_services = []
-    # while True:
-    #     register_services = []
-    #     tmp_stack = metadatarequest.MetadataRequest.get_self_stack()
-    #     for stack_service in tmp_stack.services:
-    #         tmp_service = metadatarequest.MetadataRequest.get_other_service(stack_service)
-    #         tmp_service_full_name = tmp_service.stack_name + "/" + stack_service
-    #         if tmp_service_full_name not in curr_registered_services:
-    #             try:
-    #                 for port in tmp_service.labels['tcpport'].split(","):
-    #                     tmp_service.tags.append(port)
-    #                     consulrequest.ConsulRequest.agent_register_service(tmp_service, register_host, consul_url)
-    #             except KeyError:
-    #                 print("No tcpport label in " + stack_service)
-    #                 continue
-    #         register_services.append(tmp_service_full_name)
-    #
-    #     for i in curr_registered_services:
-    #         if i not in register_services:
-    #             consulrequest.ConsulRequest.agent_deregister_service(i, consul_url)
-    #     curr_registered_services = register_services
-    #
-    #     time.sleep(5)
 
 
 def start_tcp_link_agent_register(gateway_services_name, register_host, consul_url):
     start_tcp_agent_register(register_host, consul_url, True)
-    # curr_registered_services = []
-    # while True:
-    #     register_services = []
-    #     self_service = metadatarequest.MetadataRequest.get_self_service()
-    #     for stack_service in self_service.links:
-    #         tmp_service = metadatarequest.MetadataRequest.get_other_service(stack_service)
-    #         tmp_service_full_name = tmp_service.stack_name + "/" + stack_service
-    #         try:
-    #             ports = tmp_service.labels['tcpport']
-    #             register_services.append(tmp_service_full_name)
-    #         except KeyError:
-    #             print("No tcpport label in " + stack_service)
-    #             continue
-    #         if tmp_service_full_name not in curr_registered_services:
-    #             for port in ports.split(","):
-    #                 tmp_service.tags.append(port)
-    #                 consulrequest.ConsulRequest.agent_register_service(tmp_service, register_host, consul_url)
-    #
-    #     for i in curr_registered_services:
-    #         if i not in register_services:
-    #             consulrequest.ConsulRequest.agent_deregister_service(i, consul_url)
-    #     curr_registered_services = register_services
-    #
-    #     time.sleep(5)
 
 
 def start_tcp_agent_register(register_host, consul_url, is_linked):
@@ -167,20 +115,6 @@ def start_tcp_agent_register(register_host, consul_url, is_linked):
                                                curr_registered_services,
                                                register_host, consul_url,
                                                "tcpport", register_method)
-        # self_service = metadatarequest.MetadataRequest.get_self_service()
-        # for stack_service in self_service.links:
-        #     tmp_service = metadatarequest.MetadataRequest.get_other_service(stack_service)
-        #     tmp_service_full_name = tmp_service.stack_name + "/" + stack_service
-        #     try:
-        #         ports = tmp_service.labels['tcpport']
-        #         register_services.append(tmp_service_full_name)
-        #     except KeyError:
-        #         print("No tcpport label in " + stack_service)
-        #         continue
-        #     if tmp_service_full_name not in curr_registered_services:
-        #         for port in ports.split(","):
-        #             tmp_service.tags.append(port)
-        #             consulrequest.ConsulRequest.agent_register_service(tmp_service, register_host, consul_url)
 
         for i in curr_registered_services:
             if i not in register_services:
@@ -201,7 +135,7 @@ def main():
         "label": start_label_register,
         "agentStackTcp": start_tcp_stack_agent_register,
         "agentLinkTcp": start_tcp_link_agent_register}
-    # gateway_services_name = metadatarequest.MetadataRequest.get_self_service().links[0]
+
     gateway_service = metadatarequest.MetadataRequest.get_other_service(gateway_services_name)
     register_host = metadatarequest.MetadataRequest.get_host()
     register_host.port = gateway_service.ports[0].split(":")[0]
@@ -214,9 +148,6 @@ def main():
         mode = mode_switcher.get(i, start_agent_link_register)
         print(i)
         executor.submit(mode, gateway_services_name, register_host, consul_url)
-        # threading.Thread(name=i,
-        #                  target=mode(gateway_services_name, register_host, consul_url),
-        #                  daemon=True).start()
 
     v = input("press any key to exit.")
 
