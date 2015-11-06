@@ -9,6 +9,8 @@ class Service:
         self.stack_name = ""
         self.links = []
         self.tags = []
+        self.location = []
+        self.tcp_port = []
 
     def print_service(self):
         print("SERVICE: " + self.stack_name+"/" + self.name + " TAGS:" + " ".join(self.tags))

@@ -74,13 +74,16 @@ def register_to_consul(services_name, stack_name, curr_registered_services, regi
             try:
                 for label in tmp_service.labels[label_name].split(','):
                     if label_name == "tcpport":
-                        register_host.port = label
-                        tmp_service.name += "_"+label
-                    tmp_service.tags.append(label)
-                    register_method(tmp_service, register_host, consul_url)
+                        tmp_service.tcp_port.append(label)
+                    if label_name == "location":
+                        tmp_service.location.append(label)
+                    # tmp_service.tags.append(label)
+
             except KeyError:
                 continue
-        register_services.append(tmp_service_name)
+            register_services.extend(register_method(tmp_service, register_host, consul_url))
+        else:
+            register_services.append(tmp_service_name)
 
     return register_services
 
