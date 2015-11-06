@@ -66,6 +66,7 @@ def start_link_register(gateway_services_name, register_host, consul_url, is_rem
 
 def register_to_consul(services_name, stack_name, curr_registered_services, register_host, consul_url, label_name,
                        register_method):
+
     register_services = []
     for link_service in services_name:
         tmp_service_name = stack_name + '/' + link_service
@@ -134,6 +135,7 @@ def main():
         "label": start_label_register,
         "agentStackTcp": start_tcp_stack_agent_register,
         "agentLinkTcp": start_tcp_link_agent_register}
+
     gateway_service = metadatarequest.MetadataRequest.get_other_service(gateway_services_name)
     register_host = metadatarequest.MetadataRequest.get_host()
     register_host.port = gateway_service.ports[0].split(":")[0]
