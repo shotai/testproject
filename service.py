@@ -10,7 +10,8 @@ class Service:
         self.links = []
         self.tags = []
         self.location = []
-        self.tcp_port = []
+        self.tcp_ports = []
+        self.public_ports = []
 
     def print_service(self):
         print("SERVICE: " + self.stack_name+"/" + self.name + " TAGS:" + " ".join(self.tags))

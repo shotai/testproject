@@ -89,6 +89,15 @@ def register_to_consul(services_name, stack_name, curr_registered_services, regi
     return register_services
 
 
+def find_host_services(host):
+    host_services = []
+    all_services = metadatarequest.MetadataRequest.get_all_services()
+    for svc in all_services:
+        if host.name == svc.hostname:
+            host_services.append(svc)
+    return host_services
+
+
 def start_tcp_stack_agent_register(gateway_services_name, register_host, consul_url):
     start_tcp_agent_register(register_host, consul_url, False)
 
@@ -122,6 +131,15 @@ def start_tcp_agent_register(register_host, consul_url, is_linked):
         curr_registered_services = register_services
 
         time.sleep(5)
+
+
+def start_host_agent_register(gateway_services_name, register_host, consul_url):
+    curr_registered_services = []
+    host_services = find_host_services(register_host)
+    for i in host_services:
+        consulrequest.ConsulRequest.agent_register_service(i, register_host, consul_url)
+
+
 
 
 def main():
