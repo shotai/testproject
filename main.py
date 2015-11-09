@@ -180,7 +180,7 @@ def main():
     for i in modes:
         mode = mode_switcher.get(i, start_agent_link_register)
         print(i)
-        executor.submit(mode, gateway_services_name, register_host, consul_url)
+        a = executor.submit(mode, gateway_services_name, register_host, consul_url)
 
     v = input("press any key to exit.")
 
