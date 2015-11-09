@@ -66,29 +66,34 @@ class ConsulRequest:
             port = i.replace("prt:", "")
             tmp = {
                 "ID": service.stack_name+'/'+service.name+"_" + port,
-                "Name": service.name,
+                "Name": service.name+"_"+port,
                 "Tags": [i],
                 "Address": host.agent_ip,
                 "Port": int(port),
             }
             payloads.append(tmp)
         if service.location:
-            tmp = {
-                "ID": service.stack_name+'/'+service.name,
-                "Name": service.name,
-                "Tags": [],
-                "Address": host.agent_ip,
-                "Port": int(host.port),
-                "checks": []
-            }
             for i in service.location:
-                loc = i.replace("loc:","")
-                tmp["Tags"].append(i)
-                tmp["checks"].append({
-                    "HTTP": "http://"+host.agent_ip+":"+host.port+loc,
+                tmp = {
+                    "ID": service.stack_name+'/'+service.name,
+                    "Name": service.name,
+                    "Tags": [],
+                    "Address": host.agent_ip,
+                    "Port": int(host.port),
+                    "Check": {}
+                }
+                loc = i.replace("loc:", "")
+                provide_location = loc.split(":")
+                tmp["Port"] = int(provide_location[0]) if len(provide_location) == 2 else tmp["Port"]
+                path = loc if len(provide_location) == 2 else tmp["Port"]+loc
+                tmp["ID"] = tmp["ID"] + "_" + path
+                tmp["Name"] = tmp["Name"] + "_" + path
+                tmp["Tags"] = [i]
+                tmp["Check"] = {
+                    "HTTP": "http://"+host.agent_ip+":"+path,
                     "Interval": "10s"
-                })
-            payloads.append(tmp)
+                }
+                payloads.append(tmp)
         return payloads
 
 

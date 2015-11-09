@@ -135,11 +135,16 @@ def start_tcp_agent_register(register_host, consul_url, is_linked):
 
 def start_host_agent_register(gateway_services_name, register_host, consul_url):
     curr_registered_services = []
-    host_services = find_host_services(register_host)
-    for i in host_services:
-        consulrequest.ConsulRequest.agent_register_service(i, register_host, consul_url)
 
-
+    while True:
+        host_services = find_host_services(register_host)
+        for i in host_services:
+            consulrequest.ConsulRequest.agent_register_service(i, register_host, consul_url)
+        for i in curr_registered_services:
+            if i not in host_services:
+                consulrequest.ConsulRequest.agent_deregister_service(i, consul_url)
+        curr_registered_services = host_services
+        time.sleep(5)
 
 
 def main():
@@ -152,7 +157,8 @@ def main():
         "remoteLink": start_remote_link_register,
         "label": start_label_register,
         "agentStackTcp": start_tcp_stack_agent_register,
-        "agentLinkTcp": start_tcp_link_agent_register}
+        "agentLinkTcp": start_tcp_link_agent_register,
+        "hostAgent": start_host_agent_register}
 
     gateway_service = metadatarequest.MetadataRequest.get_other_service(gateway_services_name)
     register_host = metadatarequest.MetadataRequest.get_host()

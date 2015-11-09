@@ -85,10 +85,10 @@ class MetadataRequest:
 
             for prt in tmp_service.ports:
                 p = prt.split("/")
-                if len(p) > 1 and prt.split("/")[1] == 'tcp':
-                    tmp_service.tcp_ports.append(prt.split(":")[0])
+                if len(p) > 1 and p[1] == 'tcp':
+                    tmp_service.tcp_ports.append(p[0].split(":")[0])
                 else:
-                    tmp_service.public_ports.append(prt.split(":")[0])
+                    tmp_service.public_ports.append(p[0].split(":")[0])
 
             try:
                 for loc in tmp_service.labels["location"]:
