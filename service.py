@@ -1,8 +1,6 @@
 class Service:
     def __init__(self):
-        self.containers = []
         self.hostname = ""
-        self.kind = ""
         self.labels = {}
         self.name = ""
         self.ports = []
