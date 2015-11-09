@@ -13,8 +13,6 @@ class ConsulRequest:
             container.print_container()
             container_ids.append(payload["ID"])
             print("Agent Register Service: " + payload["ID"] + ", Result: " + r.text)
-        print("agent_register_container")
-        print(container_ids)
         return container_ids
 
     @staticmethod
@@ -27,41 +25,37 @@ class ConsulRequest:
     def generate_container_payload(container, host):
         payloads = []
         for i in container.tcp_ports:
-            print("generate_container_payload1")
             tmp = {
-                "ID": container.stack_name+'/'+container.service_name+"/" + container.name + "_" + i,
-                "Name": container.stack_name+'/'+container.service_name+"_" + i,
+                "ID": container.stack_name+'-'+container.service_name+"-" + container.name + "_" + i,
+                "Name": container.stack_name+'-'+container.service_name+"-" + i,
                 "Tags": [i],
                 "Address": host.agent_ip,
                 "Port": int(i)
             }
-            print("generate_container_payload2")
+            tmp["ID"] = tmp["ID"].replace("/","-")
+            tmp["Name"] = tmp["Name"].replace("/","-")
             payloads.append(tmp)
         for i in container.locations:
-            print("generate_container_payload3")
             tmp = {
-                "ID": container.stack_name+'/'+container.service_name+"/" + container.name + "_" + i,
-                "Name": container.stack_name+'/'+container.service_name,
+                "ID": container.stack_name+'-'+container.service_name+"-" + container.name + "-" + i,
+                "Name": container.stack_name+'-'+container.service_name,
                 "Tags": [],
                 "Address": host.agent_ip,
                 "Port": int(host.port),
                 "Check":{}
             }
-            print("generate_container_payload4")
             loc = i.replace("loc:","")
-            print(loc)
             provide_location = loc.split(":")
-            print(provide_location)
+            path = provide_location[1] if len(provide_location) == 2 else provide_location[0]
             tmp["Port"] = int(provide_location[0]) if len(provide_location) == 2 else tmp["Port"]
-            path = "".join(provide_location) if len(provide_location) == 2 else str(tmp["Port"])+loc
-            print(path)
-            tmp["ID"] = tmp["ID"] + "_" + path
-            print("generate_container_payload5")
-            tmp["Name"] = tmp["Name"] + "_" + path
-            print("generate_container_payload6")
-            tmp["Tags"] = [i]
+            whole_path = str(tmp["Port"]) + path
+            tmp["ID"] = tmp["ID"] + "-" + whole_path
+            tmp["Name"] = tmp["Name"] + "-" + whole_path
+            tmp["ID"] = tmp["ID"].replace("/","-").replace(":","-")
+            tmp["Name"] = tmp["Name"].replace("/","-").replace(":","-")
+            tmp["Tags"] = ["loc:"+path]
             tmp["Check"] = {
-                "HTTP": "http://"+host.agent_ip+":"+path,
+                "HTTP": "http://"+host.agent_ip+":"+whole_path,
                 "Interval": "10s"
             }
             payloads.append(tmp)

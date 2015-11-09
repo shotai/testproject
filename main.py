@@ -24,8 +24,6 @@ def start_host_container_agent_register(register_host, consul_url):
                 register_containers.extend(consulrequest.ConsulRequest.agent_register_container(i,
                                                                                                 register_host,
                                                                                                 consul_url))
-        print(register_containers)
-        print(curr_registered_services)
         for n in curr_registered_services:
             if n not in register_containers:
                 consulrequest.ConsulRequest.agent_deregister_service(n, consul_url)
@@ -44,7 +42,7 @@ def main():
 
     register_host.dc = data_center
 
-    thread = Thread(start_host_container_agent_register, register_host, consul_url)
+    thread = Thread(target=start_host_container_agent_register, args=(register_host, consul_url))
     thread.start()
     thread.join()
 

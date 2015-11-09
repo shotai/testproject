@@ -43,12 +43,15 @@ class MetadataRequest:
             tmp_container.create_index = i['create_index']
             tmp_container.hostname = i['hostname']
             tmp_container.stack_name = i['stack_name']
+            tmp_container.name=i['name']
+            tmp_container.service_name = i["service_name"]
             tmp_container.ports = i['ports']
             tmp_container.labels = i['labels']
-            for prt in tmp_container.ports:
-                p = prt.split("/")
-                if len(p) > 1 and p[1] == 'tcp':
-                    tmp_container.tcp_ports.append(p[0].split(":")[1])
+            try:
+                for prt in tmp_container.labels["tcpports"].split(","):
+                    tmp_container.tcp_ports.append(prt)
+            except KeyError:
+                pass
 
             try:
                 for loc in tmp_container.labels["location"].split(","):
