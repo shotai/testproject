@@ -45,6 +45,19 @@ class ConsulRequest:
         return services_id
 
     @staticmethod
+    def agent_register_container(container, host, consul_url):
+        container_ids = []
+        payloads = ConsulRequest.generate_service_payload(container, host)
+        url = consul_url + "/v1/agent/service/register"
+        for payload in payloads:
+            r = requests.post(url, json=payload)
+            container.print_service()
+            container_ids.append(container.name)
+            print("Agent Register Service: " + payload["ID"] + ", Result: " + r.text)
+        return container_ids
+
+
+    @staticmethod
     def remote_deregister_service(service_id, host, consul_url):
         payload = {"Datacenter": host.dc,
                    "Node": host.name,
@@ -94,6 +107,41 @@ class ConsulRequest:
                     "Interval": "10s"
                 }
                 payloads.append(tmp)
+        return payloads
+
+    @staticmethod
+    def generate_container_payload(container, host):
+        payloads = []
+        for i in container.tcp_ports:
+            tmp = {
+                "ID": container.stack_name+'/'+container.service_name+"/" + container.name + "_" + i,
+                "Name": container.stack_name+'/'+container.service_name+"_" + i,
+                "Tags": [i],
+                "Address": host.agent_ip,
+                "Port": int(i)
+            }
+            payloads.append(tmp)
+        for i in container.location:
+            tmp = {
+                "ID": container.stack_name+'/'+container.service_name+"/" + container.name + "_" + i,
+                "Name": container.stack_name+'/'+container.service_name,
+                "Tags": [],
+                "Address": host.agent_ip,
+                "Port": int(host.port),
+                "Check":{}
+            }
+            loc = i.replace("loc:","")
+            provide_location = loc.split(":")
+            tmp["Port"] = int(provide_location[0]) if len(provide_location) == 2 else tmp["Port"]
+            path = loc if len(provide_location) == 2 else tmp["Port"]+loc
+            tmp["ID"] = tmp["ID"] + "_" + path
+            tmp["Name"] = tmp["Name"] + "_" + path
+            tmp["Tags"] = [i]
+            tmp["Check"] = {
+                "HTTP": "http://"+host.agent_ip+":"+path,
+                "Interval": "10s"
+            }
+            payloads.append(tmp)
         return payloads
 
 

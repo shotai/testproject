@@ -89,16 +89,7 @@ def register_to_consul(services_name, stack_name, curr_registered_services, regi
     return register_services
 
 
-def find_host_services(host):
-    host_services = []
-    all_services = metadatarequest.MetadataRequest.get_all_services()
-    print(all_services)
-    for svc in all_services:
-        print(svc.hostname)
-        if host.name == svc.hostname:
-            host_services.append(svc)
-    print(host_services)
-    return host_services
+
 
 
 def start_tcp_stack_agent_register(gateway_services_name, register_host, consul_url):
@@ -136,6 +127,18 @@ def start_tcp_agent_register(register_host, consul_url, is_linked):
         time.sleep(5)
 
 
+def find_host_services(host):
+    host_services = []
+    all_services = metadatarequest.MetadataRequest.get_all_services()
+    print(all_services)
+    for svc in all_services:
+        print(svc.hostname)
+        if host.name == svc.hostname:
+            host_services.append(svc)
+    print(host_services)
+    return host_services
+
+
 def start_host_agent_register(gateway_services_name, register_host, consul_url):
     curr_registered_services = []
 
@@ -152,6 +155,32 @@ def start_host_agent_register(gateway_services_name, register_host, consul_url):
         time.sleep(5)
 
 
+def find_host_register_containers(host):
+    host_register_containers = []
+    all_containers = metadatarequest.MetadataRequest.get_all_containers()
+    for cont in all_containers:
+        print(cont.hostname)
+        if host.name == cont.hostname and (cont.tcp_ports or cont.location):
+            host_register_containers.append(cont)
+    print(host_register_containers)
+    return host_register_containers
+
+
+def start_host_container_agent_register(gateway_services_name, register_host, consul_url):
+    curr_registered_services = []
+
+    while True:
+        host_register_containers = find_host_register_containers(register_host)
+        for i in host_register_containers:
+            print(i.name)
+            if i.location or i.tcp_ports:
+                consulrequest.ConsulRequest.agent_register_service(i, register_host, consul_url)
+        for i in curr_registered_services:
+            if i not in host_register_containers:
+                consulrequest.ConsulRequest.agent_deregister_service(i, consul_url)
+        curr_registered_services = host_register_containers
+        time.sleep(5)
+
 def main():
     consul_url = os.environ.get("CONSUL", "http://localhost:8500")
     data_center = os.environ.get("DATACENTER", "dc1")
@@ -163,7 +192,8 @@ def main():
         "label": start_label_register,
         "agentStackTcp": start_tcp_stack_agent_register,
         "agentLinkTcp": start_tcp_link_agent_register,
-        "hostAgent": start_host_agent_register}
+        "hostAgent": start_host_agent_register,
+        "hostContainer": start_host_container_agent_register}
 
     register_host = metadatarequest.MetadataRequest.get_host()
     if not register_host:

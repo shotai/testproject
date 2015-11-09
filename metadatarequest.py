@@ -2,7 +2,7 @@ import requests
 import host
 import service
 import stack
-
+import container
 
 class MetadataRequest:
     @staticmethod
@@ -125,6 +125,44 @@ class MetadataRequest:
                 pass
             tmp_services.append(tmp_service)
         return tmp_services
+
+    @staticmethod
+    def get_all_containers():
+        try:
+            res = requests.get(url="http://rancher-metadata/2015-07-25/containers",
+                               headers={"Accept": "application/json"})
+        except requests.HTTPError:
+            print("HTTPError: get all containers")
+            return []
+
+        res = res.json()
+        print(res)
+        try:
+            if res["code"] == 404:
+                return []
+        except KeyError:
+            pass
+        tmp_containers = []
+        for i in res:
+            tmp_container = container.Container()
+            tmp_container.create_index = i['create_index']
+            tmp_container.hostname = i['hostname']
+            tmp_container.stack_name = i['stack_name']
+            tmp_container.ports = i['ports']
+            tmp_container.labels = i['labels']
+
+            for prt in tmp_container.ports:
+                p = prt.split("/")
+                if len(p) > 1 and p[1] == 'tcp':
+                    tmp_container.tcp_ports.append(p[0].split(":")[1])
+
+            try:
+                for loc in tmp_container.labels["location"]:
+                    tmp_container.locations.append(loc)
+            except KeyError:
+                pass
+            tmp_containers.append(tmp_container)
+        return tmp_containers
 
 
 
