@@ -92,6 +92,7 @@ def register_to_consul(services_name, stack_name, curr_registered_services, regi
 def find_host_services(host):
     host_services = []
     all_services = metadatarequest.MetadataRequest.get_all_services()
+    print(all_services)
     for svc in all_services:
         print(svc.hostname)
         if host.name == svc.hostname:

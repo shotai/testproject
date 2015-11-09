@@ -96,6 +96,7 @@ class MetadataRequest:
             return []
 
         res = res.json()
+        print(res)
         try:
             if res["code"] == 404:
                 return []
