@@ -139,7 +139,8 @@ def start_host_agent_register(gateway_services_name, register_host, consul_url):
     while True:
         host_services = find_host_services(register_host)
         for i in host_services:
-            consulrequest.ConsulRequest.agent_register_service(i, register_host, consul_url)
+            if i.location or i.tcp_ports:
+                consulrequest.ConsulRequest.agent_register_service(i, register_host, consul_url)
         for i in curr_registered_services:
             if i not in host_services:
                 consulrequest.ConsulRequest.agent_deregister_service(i, consul_url)
