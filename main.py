@@ -93,8 +93,10 @@ def find_host_services(host):
     host_services = []
     all_services = metadatarequest.MetadataRequest.get_all_services()
     for svc in all_services:
+        print(svc.hostname)
         if host.name == svc.hostname:
             host_services.append(svc)
+    print(host_services)
     return host_services
 
 
@@ -139,6 +141,7 @@ def start_host_agent_register(gateway_services_name, register_host, consul_url):
     while True:
         host_services = find_host_services(register_host)
         for i in host_services:
+            print(i.name)
             if i.location or i.tcp_ports:
                 consulrequest.ConsulRequest.agent_register_service(i, register_host, consul_url)
         for i in curr_registered_services:
