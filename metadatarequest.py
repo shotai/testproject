@@ -136,11 +136,12 @@ class MetadataRequest:
             return []
 
         res = res.json()
-        print(res)
         try:
             if res["code"] == 404:
                 return []
         except KeyError:
+            pass
+        except TypeError:
             pass
         tmp_containers = []
         for i in res:
@@ -150,14 +151,13 @@ class MetadataRequest:
             tmp_container.stack_name = i['stack_name']
             tmp_container.ports = i['ports']
             tmp_container.labels = i['labels']
-
             for prt in tmp_container.ports:
                 p = prt.split("/")
                 if len(p) > 1 and p[1] == 'tcp':
                     tmp_container.tcp_ports.append(p[0].split(":")[1])
 
             try:
-                for loc in tmp_container.labels["location"]:
+                for loc in tmp_container.labels["location"].split(","):
                     tmp_container.locations.append(loc)
             except KeyError:
                 pass
