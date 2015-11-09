@@ -159,10 +159,8 @@ def find_host_register_containers(host):
     host_register_containers = []
     all_containers = metadatarequest.MetadataRequest.get_all_containers()
     for cont in all_containers:
-        print(cont.hostname)
         if host.name == cont.hostname and (cont.tcp_ports or cont.location):
             host_register_containers.append(cont)
-    print(host_register_containers)
     return host_register_containers
 
 
@@ -171,6 +169,7 @@ def start_host_container_agent_register(gateway_services_name, register_host, co
 
     while True:
         host_register_containers = find_host_register_containers(register_host)
+        print(host_register_containers)
         for i in host_register_containers:
             print(i.name)
             if i.location or i.tcp_ports:
@@ -210,6 +209,7 @@ def main():
     for i in modes:
         mode = mode_switcher.get(i, start_agent_link_register)
         print(i)
+        print(mode)
         a = executor.submit(mode, gateway_services_name, register_host, consul_url)
 
     v = input("press any key to exit.")
