@@ -104,11 +104,11 @@ class MetadataRequest:
         tmp_services = []
         for i in res:
             tmp_service = service.Service()
-            tmp_service.name = res['name']
-            tmp_service.hostname = res['hostname']
-            tmp_service.stack_name = res['stack_name']
-            tmp_service.ports = res['ports']
-            tmp_service.labels = res['labels']
+            tmp_service.name = i['name']
+            tmp_service.hostname = i['hostname']
+            tmp_service.stack_name = i['stack_name']
+            tmp_service.ports = i['ports']
+            tmp_service.labels = i['labels']
 
             for prt in tmp_service.ports:
                 p = prt.split("/")
