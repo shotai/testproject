@@ -7,7 +7,12 @@ import stack
 class MetadataRequest:
     @staticmethod
     def get_host():
-        res = requests.get(url="http://rancher-metadata/2015-07-25/self/host", headers={"Accept": "application/json"})
+        try:
+            res = requests.get(url="http://rancher-metadata/2015-07-25/self/host",
+                               headers={"Accept": "application/json"})
+        except requests.HTTPError:
+            print("HTTPError: get host")
+            return None
         res = res.json()
         tmp_host = host.Host()
         tmp_host.agent_ip = res['agent_ip']
@@ -18,8 +23,12 @@ class MetadataRequest:
 
     @staticmethod
     def get_other_service(name):
-        res = requests.get(url="http://rancher-metadata/2015-07-25/services/"+name,
-                           headers={"Accept": "application/json"})
+        try:
+            res = requests.get(url="http://rancher-metadata/2015-07-25/services/"+name,
+                               headers={"Accept": "application/json"})
+        except requests.HTTPError:
+            print("HTTPError: get other service")
+            return None
         res = res.json()
         tmp_service = service.Service()
         tmp_service.containers = res['containers']
@@ -37,8 +46,12 @@ class MetadataRequest:
 
     @staticmethod
     def get_self_service():
-        res = requests.get(url="http://rancher-metadata/2015-07-25/self/service",
-                           headers={"Accept": "application/json"})
+        try:
+            res = requests.get(url="http://rancher-metadata/2015-07-25/self/service",
+                               headers={"Accept": "application/json"})
+        except requests.HTTPError:
+            print("HTTPError: get self service")
+            return None
         res = res.json()
         tmp_service = service.Service()
         tmp_service.name = res['name']
@@ -56,8 +69,12 @@ class MetadataRequest:
 
     @staticmethod
     def get_self_stack():
-        res = requests.get(url="http://rancher-metadata/2015-07-25/self/stack",
-                           headers={"Accept": "application/json"})
+        try:
+            res = requests.get(url="http://rancher-metadata/2015-07-25/self/stack",
+                               headers={"Accept": "application/json"})
+        except requests.HTTPError:
+            print("HTTPError: get self stack")
+            return None
         res = res.json()
         tmp_stack = stack.Stack()
         tmp_stack.name = res['name']
@@ -68,8 +85,12 @@ class MetadataRequest:
 
     @staticmethod
     def get_all_services():
-        res = requests.get(url="http://rancher-metadata/2015-07-25/services",
-                           headers={"Accept": "application/json"})
+        try:
+            res = requests.get(url="http://rancher-metadata/2015-07-25/services",
+                               headers={"Accept": "application/json"})
+        except requests.HTTPError:
+            print("HTTPError: get all services")
+            return []
 
         res = res.json()
         tmp_services = []

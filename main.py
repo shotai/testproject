@@ -160,9 +160,13 @@ def main():
         "agentLinkTcp": start_tcp_link_agent_register,
         "hostAgent": start_host_agent_register}
 
-    gateway_service = metadatarequest.MetadataRequest.get_other_service(gateway_services_name)
     register_host = metadatarequest.MetadataRequest.get_host()
-    register_host.port = gateway_service.ports[0].split(":")[0]
+    if not register_host:
+        print("Cannot get host info")
+        return
+    gateway_service = metadatarequest.MetadataRequest.get_other_service(gateway_services_name)
+    if gateway_service:
+        register_host.port = gateway_service.ports[0].split(":")[0]
     register_host.dc = data_center
 
     modes = register_mode.split(",")
