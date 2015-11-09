@@ -21,31 +21,7 @@ class MetadataRequest:
         tmp_host.print_host()
         return tmp_host
 
-    @staticmethod
-    def get_other_service(name):
-        try:
-            res = requests.get(url="http://rancher-metadata/2015-07-25/services/"+name,
-                               headers={"Accept": "application/json"})
-        except requests.HTTPError:
-            print("HTTPError: get other service")
-            return None
-        res = res.json()
-        try:
-            if res["code"] == '404':
-                return []
-        except KeyError:
-            pass
-        tmp_service = service.Service()
-        tmp_service.name = res['name']
-        tmp_service.hostname = res['hostname']
-        tmp_service.stack_name = res['stack_name']
-        tmp_service.ports = res['ports']
-        tmp_service.labels = res['labels']
-        #tmp_service.links = res['links']
-        for k, v in res['links'].items():
-            tmp_service.links.append(k.split("/")[1])
 
-        return tmp_service
 
     @staticmethod
     def get_self_service():
@@ -59,11 +35,9 @@ class MetadataRequest:
         tmp_service = service.Service()
         tmp_service.name = res['name']
         tmp_service.hostname = res['hostname']
-        tmp_service.kind = res['kind']
         tmp_service.stack_name = res['stack_name']
         tmp_service.ports = res['ports']
         tmp_service.labels = res['labels']
-        tmp_service.containers = res['containers']
         #tmp_service.links = res['links']
         for k, v in res['links'].items():
             tmp_service.links.append(k.split("/")[1])
@@ -85,6 +59,32 @@ class MetadataRequest:
             tmp_stack.services.append(i)
 
         return tmp_stack
+
+    @staticmethod
+    def get_other_service(name):
+        try:
+            res = requests.get(url="http://rancher-metadata/2015-07-25/services/"+name,
+                               headers={"Accept": "application/json"})
+        except requests.HTTPError:
+            print("HTTPError: get other service")
+            return None
+        res = res.json()
+        try:
+            if res["code"] == 404:
+                return None
+        except KeyError:
+            pass
+        tmp_service = service.Service()
+        tmp_service.name = res['name']
+        tmp_service.hostname = res['hostname']
+        tmp_service.stack_name = res['stack_name']
+        tmp_service.ports = res['ports']
+        tmp_service.labels = res['labels']
+        #tmp_service.links = res['links']
+        for k, v in res['links'].items():
+            tmp_service.links.append(k.split("/")[1])
+
+        return tmp_service
 
     @staticmethod
     def get_all_services():
