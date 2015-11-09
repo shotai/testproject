@@ -97,7 +97,7 @@ class MetadataRequest:
 
         res = res.json()
         try:
-            if res["code"] == '404':
+            if res["code"] == 404:
                 return []
         except KeyError:
             pass
