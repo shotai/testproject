@@ -30,6 +30,11 @@ class MetadataRequest:
             print("HTTPError: get other service")
             return None
         res = res.json()
+        try:
+            if res["code"] == '404':
+                return []
+        except KeyError:
+            pass
         tmp_service = service.Service()
         tmp_service.name = res['name']
         tmp_service.hostname = res['hostname']
@@ -91,6 +96,11 @@ class MetadataRequest:
             return []
 
         res = res.json()
+        try:
+            if res["code"] == '404':
+                return []
+        except KeyError:
+            pass
         tmp_services = []
         for i in res:
             tmp_service = service.Service()
