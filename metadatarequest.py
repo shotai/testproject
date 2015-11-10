@@ -8,11 +8,27 @@ class MetadataRequest:
     def get_host():
         try:
             res = requests.get(url="http://rancher-metadata/2015-07-25/self/host",
-                               headers={"Accept": "application/json"})
+                               headers={"Accept": "application/json"},
+                               timeout=3)
         except requests.HTTPError:
-            print("HTTPError: get host")
+            print("HTTPError: get_host")
             return None
+        except requests.ConnectionError:
+            print("ConnectionError: get_host")
+            return None
+        except requests.Timeout:
+            print("Timeout: get_host")
+            return None
+
         res = res.json()
+        try:
+            if res["code"] == 404:
+                return None
+        except KeyError:
+            pass
+        except TypeError:
+            pass
+
         tmp_host = host.Host()
         tmp_host.agent_ip = res['agent_ip']
         tmp_host.name = res['name']
@@ -24,9 +40,16 @@ class MetadataRequest:
     def get_all_containers():
         try:
             res = requests.get(url="http://rancher-metadata/2015-07-25/containers",
-                               headers={"Accept": "application/json"})
+                               headers={"Accept": "application/json"},
+                               timeout=3)
         except requests.HTTPError:
-            print("HTTPError: get all containers")
+            print("HTTPError: get_all_containers")
+            return []
+        except requests.ConnectionError:
+            print("ConnectionError: get_all_containers")
+            return []
+        except requests.Timeout:
+            print("Timeout: get_all_containers")
             return []
 
         res = res.json()
@@ -37,6 +60,7 @@ class MetadataRequest:
             pass
         except TypeError:
             pass
+
         tmp_containers = []
         for i in res:
             tmp_container = container.Container()

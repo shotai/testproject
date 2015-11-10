@@ -9,7 +9,17 @@ class ConsulRequest:
         payloads = ConsulRequest.generate_container_payload(container, host)
         url = consul_url + "/v1/agent/service/register"
         for payload in payloads:
-            r = requests.post(url, json=payload)
+            try:
+                r = requests.post(url, json=payload, timeout=3)
+            except requests.HTTPError:
+                print("HTTPError: agent_register_container")
+                continue
+            except requests.ConnectionError:
+                print("ConnectionError: agent_register_container")
+                continue
+            except requests.Timeout:
+                print("Timeout: agent_register_container")
+                continue
             container.print_container()
             container_ids.append(payload["ID"])
             print("Agent Register Service: " + payload["ID"] + ", Result: " + r.text)
@@ -46,16 +56,22 @@ class ConsulRequest:
             }
             loc = i.replace("loc:","")
             provide_location = loc.split(":")
-            path = provide_location[1] if len(provide_location) == 2 else provide_location[0]
-            tmp["Port"] = int(provide_location[0]) if len(provide_location) == 2 else tmp["Port"]
-            whole_path = str(tmp["Port"]) + path
-            tmp["ID"] = tmp["ID"] + "-" + whole_path
-            tmp["Name"] = tmp["Name"] + "-" + whole_path
+            if len(provide_location) != 3:
+                print("Bad location format: " + i)
+                continue
+            
+            private_port = provide_location[1]
+            public_port = provide_location[0]
+            path = provide_location[2]
+
+            tmp["Port"] = int(public_port)
+            tmp["ID"] = tmp["ID"] + "-" + public_port + path
+            tmp["Name"] = tmp["Name"] + "-" + public_port + path
             tmp["ID"] = tmp["ID"].replace("/","-").replace(":","-")
             tmp["Name"] = tmp["Name"].replace("/","-").replace(":","-")
             tmp["Tags"] = ["loc:"+path]
             tmp["Check"] = {
-                "HTTP": "http://"+container.primary_ip+":"+whole_path,
+                "HTTP": "http://"+container.primary_ip+":"+private_port+path,
                 "Interval": "10s"
             }
             payloads.append(tmp)
