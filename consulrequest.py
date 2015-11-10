@@ -59,7 +59,7 @@ class ConsulRequest:
             if len(provide_location) != 3:
                 print("Bad location format: " + i)
                 continue
-            
+
             private_port = provide_location[1]
             public_port = provide_location[0]
             path = provide_location[2]
