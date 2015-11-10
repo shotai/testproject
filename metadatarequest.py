@@ -47,6 +47,7 @@ class MetadataRequest:
             tmp_container.service_name = i["service_name"]
             tmp_container.ports = i['ports']
             tmp_container.labels = i['labels']
+            tmp_container.primary_ip = i['primary_ip']
             try:
                 for prt in tmp_container.labels["tcpports"].split(","):
                     tmp_container.tcp_ports.append(prt)

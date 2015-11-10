@@ -55,7 +55,7 @@ class ConsulRequest:
             tmp["Name"] = tmp["Name"].replace("/","-").replace(":","-")
             tmp["Tags"] = ["loc:"+path]
             tmp["Check"] = {
-                "HTTP": "http://"+host.agent_ip+":"+whole_path,
+                "HTTP": "http://"+container.primary_ip+":"+whole_path,
                 "Interval": "10s"
             }
             payloads.append(tmp)
