@@ -83,7 +83,8 @@ class MetadataRequest:
                     tmp_container.locations.append(loc)
             except KeyError:
                 pass
-            tmp_containers.append(tmp_container)
+            if tmp_container.stack_name and tmp_container.service_name:
+                tmp_containers.append(tmp_container)
         return tmp_containers
 
 

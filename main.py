@@ -46,7 +46,6 @@ def main():
     thread.start()
     thread.join()
 
-    #v = input("press any key to exit.")
 
 
 if __name__ == "__main__":

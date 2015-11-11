@@ -63,9 +63,6 @@ class ConsulRequest:
             public_port = provide_location[0]
             private_port = provide_location[1]
             path = provide_location[2]
-            print(public_port)
-            print(private_port)
-            print(path)
 
             tmp["Port"] = int(public_port)
             tmp["ID"] = tmp["ID"] + "-" + public_port + path
