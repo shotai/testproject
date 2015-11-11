@@ -12,23 +12,32 @@ class ConsulRequest:
             try:
                 r = requests.post(url, json=payload, timeout=3)
             except requests.HTTPError:
-                print("HTTPError: agent_register_container")
+                print("HTTPError: register container " + payload["ID"])
                 continue
             except requests.ConnectionError:
-                print("ConnectionError: agent_register_container")
+                print("ConnectionError: register container " + payload["ID"])
                 continue
             except requests.Timeout:
-                print("Timeout: agent_register_container")
+                print("Timeout: register container " + payload["ID"])
                 continue
-            container.print_container()
             container_ids.append(payload["ID"])
-            print("Agent Register Service: " + payload["ID"] + ", Result: " + r.text)
+            print("Agent Register Container: " + payload["ID"] + ", Result: " + r.text)
         return container_ids
 
     @staticmethod
     def agent_deregister_service(service_id, consul_url):
         url = consul_url + "/v1/agent/service/deregister/"+service_id
-        r = requests.post(url)
+        try:
+            r = requests.post(url, timeout=3)
+        except requests.HTTPError:
+            print("HTTPError: deregister service " + service_id)
+            return
+        except requests.ConnectionError:
+            print("ConnectionError: deregister service " + service_id)
+            return
+        except requests.Timeout:
+            print("Timeout: deregister service " + service_id)
+            return
         print("Agent Deregister Service: " + service_id + ", Result: " + r.text)
 
     @staticmethod
@@ -36,7 +45,7 @@ class ConsulRequest:
         payloads = []
         for i in container.tcp_ports:
             p = i.split(":")
-            if len(p)<2:
+            if len(p) != 2:
                 print("Bad tcpports format: " + i)
                 continue
             tmp = {
