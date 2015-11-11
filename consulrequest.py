@@ -35,12 +35,16 @@ class ConsulRequest:
     def generate_container_payload(container, host):
         payloads = []
         for i in container.tcp_ports:
+            p = i.split(":")
+            if len(p)<2:
+                print("Bad tcpports format: " + i)
+                continue
             tmp = {
                 "ID": container.stack_name+'-'+container.service_name+"-" + container.name + "_" + i,
                 "Name": container.stack_name+'-'+container.service_name+"-" + i,
                 "Tags": [i],
                 "Address": host.agent_ip,
-                "Port": int(i)
+                "Port": int(p[0])
             }
             tmp["ID"] = tmp["ID"].replace("/","-")
             tmp["Name"] = tmp["Name"].replace("/","-")
