@@ -44,9 +44,10 @@ class ConsulRequest:
     def generate_container_payload(container, host):
         payloads = []
         for i in container.tcp_ports:
-            p = i.split(":")
+            ports = i.replace("tcp:", "")
+            p = ports.split(":")
             if len(p) != 2:
-                print("Bad tcpports format: " + i)
+                print("Bad tcp ports format: " + i)
                 continue
             tmp = {
                 "ID": container.stack_name+'-'+container.service_name+"-" + container.name + "_" + i,

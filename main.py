@@ -14,7 +14,7 @@ def find_host_register_containers(host):
     return host_register_containers
 
 
-def start_host_container_agent_register(register_host, consul_url):
+def start_host_container_agent_register(register_host):
     curr_registered_services = []
     while True:
         register_containers = []
@@ -28,12 +28,16 @@ def start_host_container_agent_register(register_host, consul_url):
             if n not in register_containers:
                 consulrequest.ConsulRequest.agent_deregister_service(n, consul_url)
         curr_registered_services = register_containers
-        time.sleep(5)
+        time.sleep(int(sleep_time))
 
 
 def main():
+    global sleep_time, consul_url
+    sleep_time = os.environ.get("SLEEPTIME", "5")
     consul_url = os.environ.get("CONSUL", "http://localhost:8500")
+
     data_center = os.environ.get("DATACENTER", "dc1")
+    use_load_balance = os.environ.get("USELB", "False")
 
     register_host = metadatarequest.MetadataRequest.get_host()
     if not register_host:
@@ -42,7 +46,7 @@ def main():
 
     register_host.dc = data_center
 
-    thread = Thread(target=start_host_container_agent_register, args=(register_host, consul_url))
+    thread = Thread(target=start_host_container_agent_register, args=(register_host))
     thread.start()
     thread.join()
 
