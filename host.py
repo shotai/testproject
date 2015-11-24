@@ -3,7 +3,6 @@ class Host:
         self.agent_ip = ""
         self.name = ""
         self.labels = {}
-        self.port = 0
         self.dc = ""
         self.uuid = ""
 

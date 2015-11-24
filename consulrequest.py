@@ -4,13 +4,15 @@ import requests
 class ConsulRequest:
 
     @staticmethod
-    def agent_register_container(container, host, consul_url, use_lb):
+    def agent_register_container(container, host, consul_url, use_lb, registered_contianer):
         container_ids = []
         payloads = ConsulRequest.generate_container_payload(container, host, use_lb)
         url = consul_url + "/v1/agent/service/register"
         for payload in payloads:
             try:
-                r = requests.post(url, json=payload, timeout=3)
+                if payload["ID"] not in registered_contianer:
+                    r = requests.post(url, json=payload, timeout=3)
+                    print("Agent Register Container: " + payload["ID"] + ", Result: " + r.text)
             except requests.HTTPError:
                 print("HTTPError: register container " + payload["ID"])
                 continue
@@ -21,7 +23,7 @@ class ConsulRequest:
                 print("Timeout: register container " + payload["ID"])
                 continue
             container_ids.append(payload["ID"])
-            print("Agent Register Container: " + payload["ID"] + ", Result: " + r.text)
+
         return container_ids
 
     @staticmethod
@@ -29,6 +31,7 @@ class ConsulRequest:
         url = consul_url + "/v1/agent/service/deregister/"+service_id
         try:
             r = requests.post(url, timeout=3)
+            print("Agent Deregister Service: " + service_id + ", Result: " + r.text)
         except requests.HTTPError:
             print("HTTPError: deregister service " + service_id)
             return
@@ -38,7 +41,6 @@ class ConsulRequest:
         except requests.Timeout:
             print("Timeout: deregister service " + service_id)
             return
-        print("Agent Deregister Service: " + service_id + ", Result: " + r.text)
 
     @staticmethod
     def generate_container_payload(container, host, use_lb):
@@ -47,7 +49,7 @@ class ConsulRequest:
             ports = i.replace("tcpport:", "")
             p = ports.split(":")
             if len(p) != 2:
-                print("Bad tcp ports format: " + i)
+                print("Bad tcpport format: " + i)
                 continue
             tmp = {
                 "ID": container.stack_name+'-'+container.service_name+"-" + container.name + "_" + i,
@@ -56,8 +58,8 @@ class ConsulRequest:
                 "Address": host.agent_ip,
                 "Port": int(p[0])
             }
-            tmp["ID"] = tmp["ID"].replace("/","-")
-            tmp["Name"] = tmp["Name"].replace("/","-")
+            tmp["ID"] = tmp["ID"].replace("/", "-")
+            tmp["Name"] = tmp["Name"].replace("/", "-")
             payloads.append(tmp)
         for i in container.locations:
             tmp = {
@@ -66,9 +68,9 @@ class ConsulRequest:
                 "Tags": [],
                 "Address": host.agent_ip,
                 "Port": int(host.port),
-                "Check":{}
+                "Check": {}
             }
-            loc = i.replace("loc:","")
+            loc = i.replace("loc:", "")
             provide_location = loc.split(":")
             if len(provide_location) != 3:
                 print("Bad location format: " + i)
@@ -81,8 +83,8 @@ class ConsulRequest:
             tmp["Port"] = int(public_port)
             tmp["ID"] = tmp["ID"] + "-" + public_port + path
             tmp["Name"] = tmp["Name"] + "-" + public_port + path
-            tmp["ID"] = tmp["ID"].replace("/","-").replace(":","-")
-            tmp["Name"] = tmp["Name"].replace("/","-").replace(":","-")
+            tmp["ID"] = tmp["ID"].replace("/", "-").replace(":", "-")
+            tmp["Name"] = tmp["Name"].replace("/", "-").replace(":", "-")
             tmp["Tags"] = ["loc:"+path]
             if use_lb == "True":
                 tmp["Check"] = {

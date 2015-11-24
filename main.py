@@ -5,15 +5,6 @@ import consulrequest
 import metadatarequest
 
 
-# def find_host_register_containers(host):
-#     host_register_containers = []
-#     all_containers = metadatarequest.MetadataRequest.get_all_containers()
-#     for cont in all_containers:
-#         if host.name == cont.hostname and (cont.tcp_ports or cont.locations):
-#             host_register_containers.append(cont)
-#     return host_register_containers
-
-
 def start_host_container_agent_register():
     curr_registered_services = []
     host_dict = {}
@@ -24,16 +15,17 @@ def start_host_container_agent_register():
     while True:
         host_dict = metadatarequest.MetadataRequest.get_all_hosts(host_dict)
         register_containers = []
-        need_register_containers = metadatarequest.MetadataRequest.get_all_containers()
+        need_register_containers = metadatarequest.MetadataRequest.get_all_register_containers()
         for i in need_register_containers:
             register_host = host_dict[i.host_uuid]
             if not register_host:
-                print("ignore: "+i.name)
+                print("No Matching Host, Ignored: "+i.name)
                 continue
             register_host.dc = data_center
             register_containers.extend(consulrequest.ConsulRequest.agent_register_container(i,
                                                                                             register_host,
-                                                                                            consul_url, use_lb))
+                                                                                            consul_url, use_lb,
+                                                                                            curr_registered_services))
         for n in curr_registered_services:
             if n not in register_containers:
                 consulrequest.ConsulRequest.agent_deregister_service(n, consul_url)

@@ -5,51 +5,19 @@ import container
 
 class MetadataRequest:
     @staticmethod
-    def get_host():
-        try:
-            res = requests.get(url="http://rancher-metadata/2015-07-25/self/host",
-                               headers={"Accept": "application/json"},
-                               timeout=3)
-        except requests.HTTPError:
-            print("HTTPError: get_host")
-            return None
-        except requests.ConnectionError:
-            print("ConnectionError: get_host")
-            return None
-        except requests.Timeout:
-            print("Timeout: get_host")
-            return None
-
-        res = res.json()
-        try:
-            if res["code"] == 404:
-                return None
-        except KeyError:
-            pass
-        except TypeError:
-            pass
-
-        tmp_host = host.Host()
-        tmp_host.agent_ip = res['agent_ip']
-        tmp_host.name = res['name']
-        tmp_host.labels = res['labels']
-        tmp_host.print_host()
-        return tmp_host
-
-    @staticmethod
-    def get_all_containers():
+    def get_all_register_containers():
         try:
             res = requests.get(url="http://rancher-metadata/2015-07-25/containers",
                                headers={"Accept": "application/json"},
                                timeout=3)
         except requests.HTTPError:
-            print("HTTPError: get_all_containers")
+            print("HTTPError: get_all_register_containers")
             return []
         except requests.ConnectionError:
-            print("ConnectionError: get_all_containers")
+            print("ConnectionError: get_all_register_containers")
             return []
         except requests.Timeout:
-            print("Timeout: get_all_containers")
+            print("Timeout: get_all_register_containers")
             return []
 
         res = res.json()
@@ -75,7 +43,7 @@ class MetadataRequest:
             tmp_container.host_uuid = i["host_uuid"]
             tmp_container.uuid = i["uuid"]
             try:
-                for prt in tmp_container.labels["tcpports"].split(","):
+                for prt in tmp_container.labels["tcpport"].split(","):
                     tmp_container.tcp_ports.append(prt)
             except KeyError:
                 pass
