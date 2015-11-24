@@ -31,13 +31,14 @@ def start_host_container_agent_register(register_host):
         time.sleep(int(sleep_time))
 
 
+
+
 def main():
     global sleep_time, consul_url
     sleep_time = os.environ.get("SLEEPTIME", "5")
     consul_url = os.environ.get("CONSUL", "http://localhost:8500")
 
     data_center = os.environ.get("DATACENTER", "dc1")
-    use_load_balance = os.environ.get("USELB", "False")
 
     register_host = metadatarequest.MetadataRequest.get_host()
     if not register_host:

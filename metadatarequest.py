@@ -67,7 +67,7 @@ class MetadataRequest:
             tmp_container.create_index = i['create_index']
             tmp_container.hostname = i['hostname']
             tmp_container.stack_name = i['stack_name']
-            tmp_container.name=i['name']
+            tmp_container.name = i['name']
             tmp_container.service_name = i["service_name"]
             tmp_container.ports = i['ports']
             tmp_container.labels = i['labels']
@@ -86,6 +86,9 @@ class MetadataRequest:
             if tmp_container.stack_name and tmp_container.service_name:
                 tmp_containers.append(tmp_container)
         return tmp_containers
+
+
+
 
 
 
