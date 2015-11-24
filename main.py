@@ -5,25 +5,34 @@ import consulrequest
 import metadatarequest
 
 
-def find_host_register_containers(host):
-    host_register_containers = []
-    all_containers = metadatarequest.MetadataRequest.get_all_containers()
-    for cont in all_containers:
-        if host.name == cont.hostname and (cont.tcp_ports or cont.locations):
-            host_register_containers.append(cont)
-    return host_register_containers
+# def find_host_register_containers(host):
+#     host_register_containers = []
+#     all_containers = metadatarequest.MetadataRequest.get_all_containers()
+#     for cont in all_containers:
+#         if host.name == cont.hostname and (cont.tcp_ports or cont.locations):
+#             host_register_containers.append(cont)
+#     return host_register_containers
 
 
-def start_host_container_agent_register(register_host):
+def start_host_container_agent_register():
     curr_registered_services = []
+    host_dict = {}
+    sleep_time = os.environ.get("SLEEPTIME", "10")
+    consul_url = os.environ.get("CONSUL", "http://localhost:8500")
+    data_center = os.environ.get("DATACENTER", "dc")
     while True:
+        host_dict = metadatarequest.MetadataRequest.get_all_hosts(host_dict)
         register_containers = []
-        host_register_containers = find_host_register_containers(register_host)
-        for i in host_register_containers:
-            if i.locations or i.tcp_ports:
-                register_containers.extend(consulrequest.ConsulRequest.agent_register_container(i,
-                                                                                                register_host,
-                                                                                                consul_url))
+        need_register_containers = metadatarequest.MetadataRequest.get_all_containers()
+        for i in need_register_containers:
+            register_host = host_dict[i.host_uuid]
+            if not register_host:
+                print("ignore: "+i.name)
+                continue
+            register_host.dc = data_center
+            register_containers.extend(consulrequest.ConsulRequest.agent_register_container(i,
+                                                                                            register_host,
+                                                                                            consul_url))
         for n in curr_registered_services:
             if n not in register_containers:
                 consulrequest.ConsulRequest.agent_deregister_service(n, consul_url)
@@ -31,27 +40,10 @@ def start_host_container_agent_register(register_host):
         time.sleep(int(sleep_time))
 
 
-
-
 def main():
-    global sleep_time, consul_url
-    sleep_time = os.environ.get("SLEEPTIME", "5")
-    consul_url = os.environ.get("CONSUL", "http://localhost:8500")
-
-    data_center = os.environ.get("DATACENTER", "dc1")
-
-    register_host = metadatarequest.MetadataRequest.get_host()
-    if not register_host:
-        print("Cannot get host info")
-        return
-
-    register_host.dc = data_center
-
-    thread = Thread(target=start_host_container_agent_register, args=(register_host))
+    thread = Thread(target=start_host_container_agent_register)
     thread.start()
     thread.join()
-
-
 
 if __name__ == "__main__":
     main()

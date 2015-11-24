@@ -5,6 +5,7 @@ class Host:
         self.labels = {}
         self.port = 0
         self.dc = ""
+        self.uuid = ""
 
     def print_host(self):
-        print("HOST: " + self.agent_ip+":"+str(self.port)+" NAME: "+self.name)
+        print("HOST: " + self.agent_ip + " NAME: "+self.name + " uuid: " + self.uuid)

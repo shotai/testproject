@@ -12,6 +12,6 @@ class Service:
         self.public_ports = []
 
     def print_service(self):
-        print("SERVICE: " + self.stack_name+"/" + self.name + " TAGS:" + " ".join(self.tags))
+        print("SERVICE: " + self.stack_name+"/" + self.name + " TAGS: " + " ".join(self.tags))
 
 
