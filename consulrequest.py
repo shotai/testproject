@@ -4,9 +4,9 @@ import requests
 class ConsulRequest:
 
     @staticmethod
-    def agent_register_container(container, host, consul_url):
+    def agent_register_container(container, host, consul_url, use_lb):
         container_ids = []
-        payloads = ConsulRequest.generate_container_payload(container, host)
+        payloads = ConsulRequest.generate_container_payload(container, host, use_lb)
         url = consul_url + "/v1/agent/service/register"
         for payload in payloads:
             try:
@@ -41,7 +41,7 @@ class ConsulRequest:
         print("Agent Deregister Service: " + service_id + ", Result: " + r.text)
 
     @staticmethod
-    def generate_container_payload(container, host):
+    def generate_container_payload(container, host, use_lb):
         payloads = []
         for i in container.tcp_ports:
             ports = i.replace("tcpport:", "")
@@ -84,10 +84,16 @@ class ConsulRequest:
             tmp["ID"] = tmp["ID"].replace("/","-").replace(":","-")
             tmp["Name"] = tmp["Name"].replace("/","-").replace(":","-")
             tmp["Tags"] = ["loc:"+path]
-            tmp["Check"] = {
-                "HTTP": "http://"+container.primary_ip+":"+private_port+path,
-                "Interval": "10s"
-            }
+            if use_lb == "True":
+                tmp["Check"] = {
+                    "HTTP": "http://"+container.primary_ip+":"+public_port+path,
+                    "Interval": "10s"
+                }
+            else:
+                tmp["Check"] = {
+                    "HTTP": "http://"+container.primary_ip+":"+private_port+path,
+                    "Interval": "10s"
+                }
             payloads.append(tmp)
         return payloads
 
