@@ -7,26 +7,25 @@ import metadatarequest
 
 def start_host_container_agent_register():
     curr_registered_services = []
-    host_dict = {}
     sleep_time = os.environ.get("TIME", "10")
     consul_url = os.environ.get("CONSUL", "http://localhost:8500")
     if not str.startswith(consul_url, "http://"):
         consul_url = "http://"+consul_url
+    register_host = metadatarequest.MetadataRequest.get_self_host()
+    if not register_host:
+        print("Cannot get host information")
+        return
     while True:
-        host_dict = metadatarequest.MetadataRequest.get_all_hosts(host_dict)
         register_containers = []
         need_register_containers = metadatarequest.MetadataRequest.get_all_register_containers()
 
         for i in need_register_containers:
-            try:
-                register_host = host_dict[i.host_uuid]
-            except KeyError:
-                print("No Matching Host, Ignored: "+i.name)
-                continue
-            register_containers.extend(consulrequest.ConsulRequest.agent_register_container(i,
-                                                                                            register_host,
-                                                                                            consul_url,
-                                                                                            curr_registered_services))
+            if i.host_uuid == register_host.uuid:
+                register_containers.extend(consulrequest.ConsulRequest.agent_register_container(i,
+                                                                                                register_host,
+                                                                                                consul_url,
+                                                                                                curr_registered_services
+                                                                                                ))
         for n in curr_registered_services:
             if n not in register_containers:
                 consulrequest.ConsulRequest.agent_deregister_service(n, consul_url)

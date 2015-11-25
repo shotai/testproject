@@ -72,19 +72,19 @@ class MetadataRequest:
         return tmp_containers
 
     @staticmethod
-    def get_all_hosts(host_dict):
+    def get_self_host():
         try:
-            res = requests.get(url="http://rancher-metadata/2015-07-25/hosts",
+            res = requests.get(url="http://rancher-metadata/2015-07-25/self/host",
                                headers={"Accept": "application/json"},
                                timeout=3)
         except requests.HTTPError:
-            print("HTTPError: get_all_hosts")
+            print("HTTPError: get_self_host")
             return []
         except requests.ConnectionError:
-            print("ConnectionError: get_all_hosts")
+            print("ConnectionError: get_self_host")
             return []
         except requests.Timeout:
-            print("Timeout: get_all_hosts")
+            print("Timeout: get_self_host")
             return []
 
         res = res.json()
@@ -97,15 +97,14 @@ class MetadataRequest:
         except TypeError:
             pass
 
+        tmp_host = None
         for i in res:
             tmp_host = host.Host()
             tmp_host.agent_ip = i["agent_ip"]
             tmp_host.name = i['name']
             tmp_host.uuid = i["uuid"]
-            if tmp_host.uuid not in host_dict:
-                host_dict[tmp_host.uuid] = tmp_host
-                tmp_host.print_host()
-        return host_dict
+            tmp_host.print_host()
+        return tmp_host
 
 
 
