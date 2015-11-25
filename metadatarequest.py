@@ -53,8 +53,13 @@ class MetadataRequest:
                     tmp_container.locations.append(loc)
             except KeyError:
                 pass
+            try:
+                for loc in tmp_container.labels["gatewayloc"].split(","):
+                    tmp_container.lb_locations.append(loc)
+            except KeyError:
+                pass
             if tmp_container.stack_name and tmp_container.service_name \
-                    and (tmp_container.tcp_ports or tmp_container.locations):
+                    and (tmp_container.tcp_ports or tmp_container.locations or tmp_container.lb_locations):
                 tmp_containers.append(tmp_container)
         return tmp_containers
 

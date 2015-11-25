@@ -24,7 +24,7 @@ def start_host_container_agent_register():
             register_host.dc = data_center
             register_containers.extend(consulrequest.ConsulRequest.agent_register_container(i,
                                                                                             register_host,
-                                                                                            consul_url, use_lb,
+                                                                                            consul_url,
                                                                                             curr_registered_services))
         for n in curr_registered_services:
             if n not in register_containers:

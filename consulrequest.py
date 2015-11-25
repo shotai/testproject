@@ -4,9 +4,9 @@ import requests
 class ConsulRequest:
 
     @staticmethod
-    def agent_register_container(container, host, consul_url, use_lb, registered_contianer):
+    def agent_register_container(container, host, consul_url, registered_contianer):
         container_ids = []
-        payloads = ConsulRequest.generate_container_payload(container, host, use_lb)
+        payloads = ConsulRequest.generate_container_payload(container, host)
         url = consul_url + "/v1/agent/service/register"
         for payload in payloads:
             try:
@@ -43,7 +43,7 @@ class ConsulRequest:
             return
 
     @staticmethod
-    def generate_container_payload(container, host, use_lb):
+    def generate_container_payload(container, host):
         payloads = []
         for i in container.tcp_ports:
             ports = i.replace("tcpport:", "")
@@ -86,16 +86,39 @@ class ConsulRequest:
             tmp["ID"] = tmp["ID"].replace("/", "-").replace(":", "-")
             tmp["Name"] = tmp["Name"].replace("/", "-").replace(":", "-")
             tmp["Tags"] = ["loc:"+path]
-            if use_lb == "True":
-                tmp["Check"] = {
-                    "HTTP": "http://"+container.primary_ip+":"+public_port+path,
-                    "Interval": "10s"
-                }
-            else:
-                tmp["Check"] = {
-                    "HTTP": "http://"+container.primary_ip+":"+private_port+path,
-                    "Interval": "10s"
-                }
+            tmp["Check"] = {
+                "HTTP": "http://"+container.primary_ip+":"+private_port+path,
+                "Interval": "10s"
+            }
+            payloads.append(tmp)
+        for i in container.lb_locations:
+            tmp = {
+                "ID": container.stack_name+'-'+container.service_name+"-" + container.name + "-" + i,
+                "Name": container.stack_name+'-'+container.service_name,
+                "Tags": [],
+                "Address": host.agent_ip,
+                "Port": int(host.port),
+                "Check": {}
+            }
+            loc = i.replace("loc:", "")
+            provide_location = loc.split(":")
+            if len(provide_location) != 3:
+                print("Bad load balancer location format: " + i)
+                continue
+
+            public_port = provide_location[0]
+            path = provide_location[2]
+
+            tmp["Port"] = int(public_port)
+            tmp["ID"] = tmp["ID"] + "-" + public_port + path
+            tmp["Name"] = tmp["Name"] + "-" + public_port + path
+            tmp["ID"] = tmp["ID"].replace("/", "-").replace(":", "-")
+            tmp["Name"] = tmp["Name"].replace("/", "-").replace(":", "-")
+            tmp["Tags"] = ["loc:"+path]
+            tmp["Check"] = {
+                "HTTP": "http://"+container.primary_ip+":"+public_port+path,
+                "Interval": "10s"
+            }
             payloads.append(tmp)
         return payloads
 
