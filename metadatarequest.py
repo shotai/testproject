@@ -31,7 +31,6 @@ class MetadataRequest:
             pass
 
         tmp_containers = []
-        consul_client = None
         for i in res:
             tmp_container = container.Container()
             tmp_container.create_index = i['create_index']
@@ -66,18 +65,11 @@ class MetadataRequest:
             except KeyError:
                 pass
 
-            # consul client
-            try:
-                if tmp_container.labels["consulclient"] == 'True':
-                    consul_client = tmp_container
-            except KeyError:
-                pass
-
             if tmp_container.stack_name and tmp_container.service_name \
                     and (tmp_container.tcp_ports or tmp_container.locations or tmp_container.lb_locations):
                 tmp_containers.append(tmp_container)
 
-        return tmp_containers, consul_client
+        return tmp_containers
 
     @staticmethod
     def get_all_hosts(host_dict):
