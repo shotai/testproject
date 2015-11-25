@@ -8,20 +8,27 @@ import metadatarequest
 def start_host_container_agent_register():
     curr_registered_services = []
     host_dict = {}
-    sleep_time = os.environ.get("SLEEPTIME", "10")
-    consul_url = os.environ.get("CONSUL", "http://localhost:8500")
-    data_center = os.environ.get("DATACENTER", "dc")
-    use_lb = os.environ.get("USELB", "True")
+    sleep_time = os.environ.get("TIME", "10")
+    consul_url = os.environ.get("CONSUL")
     while True:
         host_dict = metadatarequest.MetadataRequest.get_all_hosts(host_dict)
         register_containers = []
-        need_register_containers = metadatarequest.MetadataRequest.get_all_register_containers()
+        need_register_containers, consul_client = metadatarequest.MetadataRequest.get_all_register_containers()
+        try:
+            if not consul_url:
+                consul_url = host_dict[consul_client.host_uuid].agent_ip
+        except KeyError:
+            print("Cannot get consul client ip")
+            break
+        except AttributeError:
+            print("Cannot get consul client container")
+            break
         for i in need_register_containers:
-            register_host = host_dict[i.host_uuid]
-            if not register_host:
+            try:
+                register_host = host_dict[i.host_uuid]
+            except KeyError:
                 print("No Matching Host, Ignored: "+i.name)
                 continue
-            register_host.dc = data_center
             register_containers.extend(consulrequest.ConsulRequest.agent_register_container(i,
                                                                                             register_host,
                                                                                             consul_url,
@@ -29,6 +36,7 @@ def start_host_container_agent_register():
         for n in curr_registered_services:
             if n not in register_containers:
                 consulrequest.ConsulRequest.agent_deregister_service(n, consul_url)
+                
         curr_registered_services = register_containers
         time.sleep(int(sleep_time))
 
