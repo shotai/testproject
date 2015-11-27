@@ -8,12 +8,16 @@ import metadatarequest
 def start_host_container_agent_register():
     curr_registered_services = []
     sleep_time = os.environ.get("TIME", "10")
-    consul_url = os.environ.get("CONSUL", "http://localhost:8500")
-    if not str.startswith(consul_url, "http://"):
-        consul_url = "http://"+consul_url
+
     register_host = metadatarequest.MetadataRequest.get_self_host()
     if not register_host:
         print("Cannot get host information")
+        return
+    consul_url = os.environ.get("CONSUL", register_host.agent_ip)
+    if not str.startswith(consul_url, "http://"):
+        consul_url = "http://"+consul_url
+    if not consul_url:
+        print("Cannot get consul address")
         return
     while True:
         register_containers = []
@@ -32,6 +36,7 @@ def start_host_container_agent_register():
 
         curr_registered_services = register_containers
         time.sleep(int(sleep_time))
+
 
 
 def main():

@@ -79,19 +79,19 @@ class MetadataRequest:
                                timeout=3)
         except requests.HTTPError:
             print("HTTPError: get_self_host")
-            return []
+            return None
         except requests.ConnectionError:
             print("ConnectionError: get_self_host")
-            return []
+            return None
         except requests.Timeout:
             print("Timeout: get_self_host")
-            return []
+            return None
 
         res = res.json()
         try:
             if res["code"] == 404:
                 print("Metadata error")
-                return []
+                return None
         except KeyError:
             pass
         except TypeError:
