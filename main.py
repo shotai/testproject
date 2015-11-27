@@ -15,7 +15,7 @@ def start_host_container_agent_register():
         return
     consul_url = os.environ.get("CONSUL", register_host.agent_ip)
     if not str.startswith(consul_url, "http://"):
-        consul_url = "http://"+consul_url
+        consul_url = "http://"+consul_url + ":8500"
     if not consul_url:
         print("Cannot get consul address")
         return
