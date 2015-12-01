@@ -55,7 +55,7 @@ class ConsulRequest:
             tmp = {
                 "ID": container.stack_name+'-'+container.service_name+"-" + container.name + "-" + i,
                 "Name": container.stack_name+'-'+container.service_name+"-" + i,
-                "Tags": [i],
+                "Tags": ["tcpport:"+p[0]],
                 "Address": host.agent_ip,
                 "Port": int(p[0])
             }
