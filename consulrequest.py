@@ -45,6 +45,7 @@ class ConsulRequest:
     @staticmethod
     def generate_container_payload(container, host):
         payloads = []
+        # tcp payload
         for i in container.tcp_ports:
             ports = i.replace("tcpport:", "")
             p = ports.split(":")
@@ -61,9 +62,13 @@ class ConsulRequest:
             tmp["ID"] = tmp["ID"].replace("/", "-")
             tmp["Name"] = tmp["Name"].replace("/", "-")
             payloads.append(tmp)
+
+        # container payload
         payloads.extend(ConsulRequest.generate_location_payload(False, container.locations,
                                                                 container.stack_name, container.service_name,
                                                                 container.name, host, container.primary_ip))
+
+        # load balancer payload
         payloads.extend(ConsulRequest.generate_location_payload(True, container.lb_locations,
                                                                 container.stack_name, container.service_name,
                                                                 container.name, host, container.primary_ip))
@@ -78,7 +83,6 @@ class ConsulRequest:
                 "Name": stack_name+'-'+service_name,
                 "Tags": [],
                 "Address": host.agent_ip,
-                "Port": int(host.port),
                 "Check": {}
             }
             loc = i.replace("loc:", "")

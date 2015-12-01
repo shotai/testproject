@@ -58,7 +58,7 @@ class MetadataRequest:
             except KeyError:
                 pass
 
-            # load balance location
+            # load balancer location
             try:
                 for loc in tmp_container.labels["lblocation"].split(","):
                     tmp_container.lb_locations.append(loc)
