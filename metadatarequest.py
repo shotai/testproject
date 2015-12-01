@@ -97,13 +97,11 @@ class MetadataRequest:
         except TypeError:
             pass
 
-        tmp_host = None
-        for i in res:
-            tmp_host = host.Host()
-            tmp_host.agent_ip = i["agent_ip"]
-            tmp_host.name = i['name']
-            tmp_host.uuid = i["uuid"]
-            tmp_host.print_host()
+        tmp_host = host.Host()
+        tmp_host.agent_ip = res["agent_ip"]
+        tmp_host.name = res['name']
+        tmp_host.uuid = res["uuid"]
+        tmp_host.print_host()
         return tmp_host
 
 
