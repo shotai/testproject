@@ -1,4 +1,4 @@
-FROM python:3.4.3
+FROM python:latest
 
 COPY *.py ./registersrc/
 RUN pip install requests

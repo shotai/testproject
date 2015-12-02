@@ -14,11 +14,12 @@ def start_host_container_agent_register():
         print("Cannot get host information")
         return
     consul_url = os.environ.get("CONSUL", register_host.agent_ip)
-    if not str.startswith(consul_url, "http://"):
-        consul_url = "http://"+consul_url + ":8500"
     if not consul_url:
         print("Cannot get consul address")
         return
+    if not str.startswith(consul_url, "http://"):
+        consul_url = "http://"+consul_url + ":8500"
+
     while True:
         register_containers = []
         need_register_containers = metadatarequest.MetadataRequest.get_all_register_containers()
