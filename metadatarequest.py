@@ -40,9 +40,8 @@ class MetadataRequest:
             tmp_container.service_name = i["service_name"]
             tmp_container.ports = i['ports']
             tmp_container.labels = i['labels']
-            tmp_container.primary_ip = i['primary_ip']
+            tmp_container.ips = i['ips']
             tmp_container.host_uuid = i["host_uuid"]
-            tmp_container.uuid = i["uuid"]
 
             # tcp port
             try:

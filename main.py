@@ -39,7 +39,6 @@ def start_host_container_agent_register():
         time.sleep(int(sleep_time))
 
 
-
 def main():
     thread = Thread(target=start_host_container_agent_register)
     thread.start()
