@@ -2,12 +2,13 @@ import requests
 
 
 class ConsulRequest:
-
     @staticmethod
-    def agent_register_container(container, host, consul_url, registered_container):
+    def agent_register_container(container, host, consul_url, registered_container, consul_token=None):
         container_ids = []
         payloads = ConsulRequest.generate_container_payload(container, host)
         url = consul_url + "/v1/agent/service/register"
+        if consul_token:
+            url += "?token=" + consul_token
         for payload in payloads:
             try:
                 if payload["ID"] not in registered_container:
@@ -27,8 +28,10 @@ class ConsulRequest:
         return container_ids
 
     @staticmethod
-    def agent_deregister_service(service_id, consul_url):
+    def agent_deregister_service(service_id, consul_url, consul_token):
         url = consul_url + "/v1/agent/service/deregister/"+service_id
+        if consul_token:
+            url += "?token=" + consul_token
         try:
             r = requests.post(url, timeout=3)
             print("Agent Deregister Service: " + service_id + ", Result: " + str(r.status_code))
@@ -66,12 +69,12 @@ class ConsulRequest:
         # container payload
         payloads.extend(ConsulRequest.generate_location_payload(False, container.locations,
                                                                 container.stack_name, container.service_name,
-                                                                container.name, host, container.primary_ip))
+                                                                container.name, host, container.ips[0]))
 
         # load balancer payload
         payloads.extend(ConsulRequest.generate_location_payload(True, container.lb_locations,
                                                                 container.stack_name, container.service_name,
-                                                                container.name, host, container.primary_ip))
+                                                                container.name, host, container.ips[0]))
         return payloads
 
     @staticmethod

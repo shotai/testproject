@@ -64,6 +64,14 @@ class MetadataRequest:
             except KeyError:
                 pass
 
+            # target label
+            for k, v in tmp_container.labels.items():
+                if k.startwith("io.rancher.loadbalancer.target"):
+                    tmp_location, tmp_tcp_port = MetadataRequest.process_target_label(
+                        v, tmp_container.ports[0].split(":")[0])
+                    tmp_container.lb_locations.extend(tmp_location)
+                    tmp_container.tcp_ports.extend(tmp_tcp_port)
+
             if tmp_container.stack_name and tmp_container.service_name \
                     and (tmp_container.tcp_ports or tmp_container.locations or tmp_container.lb_locations):
                 tmp_containers.append(tmp_container)
@@ -102,6 +110,38 @@ class MetadataRequest:
         tmp_host.uuid = res["uuid"]
         tmp_host.print_host()
         return tmp_host
+
+    @staticmethod
+    def process_target_label(target, port):
+        location = []
+        tcp_port = []
+        for t in target.split(","):
+            routing_path = t.split("=")[0]
+            if ":" in routing_path and "/" in routing_path:
+                tmp_loc = routing_path.split(":")[1]
+                tmp_port = tmp_loc.split("/")[0]
+                tmp_location = tmp_loc.lstrip(tmp_port)
+                location.append(tmp_port+":"+tmp_port+":"+tmp_location)
+            elif "/" in routing_path:
+                tmp_port = routing_path.split("/")[0]
+                if tmp_port.isdigit():
+                    tmp_location = routing_path.lstrip(tmp_port)
+                else:
+                    tmp_port = port
+                    tmp_location = routing_path
+                location.append(tmp_port+":"+tmp_port+":"+tmp_location)
+            elif ":" in routing_path:  # the rule without path will be treated as tcp port
+                tmp_port = routing_path.split(":")[1]
+                tcp_port.append(tmp_port+":"+tmp_port)
+            else:
+                tcp_port.append(routing_path+":"+routing_path)
+        print(location)
+        print(tcp_port)
+        return location, tcp_port
+
+
+
+
 
 
 
