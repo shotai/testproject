@@ -90,25 +90,29 @@ class ConsulRequest:
             }
             loc = i.replace("loc:", "")
             provide_location = loc.split(":")
-            if len(provide_location) != 3:
+            if len(provide_location) != 3 and len(provide_location) != 4:
                 print("Bad location format: " + i)
                 continue
             public_port = provide_location[0]
             private_port = provide_location[1]
-            path = provide_location[2]
-
+            loc = provide_location[2]
+            try:
+                path = provide_location[3]
+            except IndexError:
+                path = None
+                pass
             tmp["Port"] = int(public_port)
-            tmp["ID"] = (tmp["ID"] + "-" + public_port + path).replace("/", "-").replace(":", "-")
-            tmp["Name"] = (tmp["Name"] + "-" + public_port + path).replace("/", "-").replace(":", "-")
-            tmp["Tags"] = ["loc:"+path]
+            tmp["ID"] = (tmp["ID"] + "-" + public_port + loc).replace("/", "-").replace(":", "-")
+            tmp["Name"] = (tmp["Name"] + "-" + public_port + loc).replace("/", "-").replace(":", "-")
+            tmp["Tags"] = ["loc:"+loc] if not path else ["loc:"+loc, "path:" + path]
             if use_lb:
                 tmp["Check"] = {
-                    "HTTP": "http://"+primary_ip+":"+public_port+path,
+                    "HTTP": "http://"+primary_ip+":"+public_port+loc,
                     "Interval": "10s"
                 }
             else:
                 tmp["Check"] = {
-                    "HTTP": "http://"+primary_ip+":"+private_port+path,
+                    "HTTP": "http://"+primary_ip+":"+private_port+loc,
                     "Interval": "10s"
                 }
             payloads.append(tmp)
