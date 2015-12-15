@@ -68,14 +68,13 @@ class MetadataRequest:
 
             # target label
             enable_target = os.environ.get("ENABLETARGET", "False")
-            if enable_target == "False":
-                continue
-            for k, v in tmp_container.labels.items():
-                if k.startswith("io.rancher.loadbalancer.target"):
-                    tmp_location, tmp_tcp_port = MetadataRequest.process_target_label(
-                        v, tmp_container.ports[0].split(":")[0])
-                    tmp_container.lb_locations.extend(tmp_location)
-                    tmp_container.tcp_ports.extend(tmp_tcp_port)
+            if enable_target == "True":
+                for k, v in tmp_container.labels.items():
+                    if k.startswith("io.rancher.loadbalancer.target"):
+                        tmp_location, tmp_tcp_port = MetadataRequest.process_target_label(
+                            v, tmp_container.ports[0].split(":")[0])
+                        tmp_container.lb_locations.extend(tmp_location)
+                        tmp_container.tcp_ports.extend(tmp_tcp_port)
 
             if tmp_container.stack_name and tmp_container.service_name \
                     and (tmp_container.tcp_ports or tmp_container.locations or tmp_container.lb_locations):

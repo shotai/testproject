@@ -38,8 +38,9 @@ def start_host_container_agent_register():
 
     while True:
         register_containers = []
+        
         need_register_containers = metadatarequest.MetadataRequest.get_all_register_containers()
-
+        
         for i in need_register_containers:
             if i.host_uuid == register_host.uuid:
                 register_containers.extend(
