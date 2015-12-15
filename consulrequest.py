@@ -46,8 +46,30 @@ class ConsulRequest:
             return
 
     @staticmethod
+    def register_consul_client(service, host, consul_url, consul_token=None):
+        payloads = ConsulRequest.generate_location_payload(False, False, service.locations, service.stack_name,
+                                                           service.name, host.name, host, host.agent_ip)
+        url = consul_url + "/v1/agent/service/register"
+        if consul_token:
+            url += "?token=" + consul_token
+        for payload in payloads:
+            try:
+                r = requests.post(url, json=payload, timeout=3)
+                print("Agent Register consul client: " + payload["ID"] + ", Result: " + str(r.status_code))
+            except requests.HTTPError:
+                print("HTTPError: register consul client " + payload["ID"])
+                continue
+            except requests.ConnectionError:
+                print("ConnectionError: register consul client " + payload["ID"])
+                continue
+            except requests.Timeout:
+                print("Timeout: register consul client " + payload["ID"])
+                continue
+
+    @staticmethod
     def generate_container_payload(container, host):
         payloads = []
+
         # tcp payload
         for i in container.tcp_ports:
             ports = i.replace("tcpport:", "")
@@ -56,37 +78,32 @@ class ConsulRequest:
                 print("Bad tcpport format: " + i)
                 continue
             tmp = {
-                "ID": container.stack_name+'-'+container.service_name+"-" + container.name + "-" + i,
-                "Name": container.stack_name+'-'+container.service_name+"-" + i,
+                "ID": container.name + "-" + i,
+                "Name": container.stack_name+'-'+container.service_name,
                 "Tags": ["tcpport:"+p[0]],
                 "Address": host.agent_ip,
                 "Port": int(p[0])
             }
-            tmp["ID"] = tmp["ID"].replace("/", "-")
-            tmp["Name"] = tmp["Name"].replace("/", "-")
             payloads.append(tmp)
 
         # container payload
-        payloads.extend(ConsulRequest.generate_location_payload(False, container.locations,
+        payloads.extend(ConsulRequest.generate_location_payload(False, True, container.locations,
                                                                 container.stack_name, container.service_name,
                                                                 container.name, host, container.ips[0]))
 
         # load balancer payload
-        payloads.extend(ConsulRequest.generate_location_payload(True, container.lb_locations,
+        payloads.extend(ConsulRequest.generate_location_payload(True, True, container.lb_locations,
                                                                 container.stack_name, container.service_name,
                                                                 container.name, host, container.ips[0]))
         return payloads
 
     @staticmethod
-    def generate_location_payload(use_lb, locations, stack_name, service_name, name, host, primary_ip):
+    def generate_location_payload(use_lb, health_check, locations, stack_name, service_name, name, host, primary_ip):
         payloads = []
         for i in locations:
             tmp = {
-                "ID": stack_name+'-'+service_name+"-"+name,
                 "Name": stack_name+'-'+service_name,
-                "Tags": [],
-                "Address": host.agent_ip,
-                "Check": {}
+                "Address": host.agent_ip
             }
             loc = i.replace("loc:", "")
             provide_location = loc.split(":")
@@ -102,15 +119,14 @@ class ConsulRequest:
                 path = None
                 pass
             tmp["Port"] = int(public_port)
-            tmp["ID"] = (tmp["ID"] + "-" + public_port + loc).replace("/", "-").replace(":", "-")
-            tmp["Name"] = (tmp["Name"] + "-" + public_port + loc).replace("/", "-").replace(":", "-")
+            tmp["ID"] = (name + '-' + public_port + '-' + loc).replace("/", "-")
             tmp["Tags"] = ["loc:"+loc] if not path else ["loc:"+loc, "path:" + path]
-            if use_lb:
+            if use_lb and health_check:
                 tmp["Check"] = {
                     "HTTP": "http://"+primary_ip+":"+public_port+loc,
                     "Interval": "10s"
                 }
-            else:
+            elif health_check:
                 tmp["Check"] = {
                     "HTTP": "http://"+primary_ip+":"+private_port+loc,
                     "Interval": "10s"

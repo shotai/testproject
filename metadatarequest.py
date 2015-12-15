@@ -1,13 +1,15 @@
 import requests
 import host
 import container
+import os
+import service
 
 
 class MetadataRequest:
     @staticmethod
     def get_all_register_containers():
         try:
-            res = requests.get(url="http://rancher-metadata/2015-07-25/containers",
+            res = requests.get(url="http://rancher-metadata/latest/containers",
                                headers={"Accept": "application/json"},
                                timeout=3)
         except requests.HTTPError:
@@ -23,7 +25,7 @@ class MetadataRequest:
         res = res.json()
         try:
             if res["code"] == 404:
-                print("Metadata error")
+                print("Metadata error, cannot get all containers")
                 return []
         except KeyError:
             pass
@@ -37,11 +39,11 @@ class MetadataRequest:
             tmp_container.hostname = i['hostname']
             tmp_container.stack_name = i['stack_name']
             tmp_container.name = i['name']
-            tmp_container.service_name = i["service_name"]
+            tmp_container.service_name = i['service_name']
             tmp_container.ports = i['ports']
             tmp_container.labels = i['labels']
             tmp_container.ips = i['ips']
-            tmp_container.host_uuid = i["host_uuid"]
+            tmp_container.host_uuid = i['host_uuid']
 
             # tcp port
             try:
@@ -65,6 +67,9 @@ class MetadataRequest:
                 pass
 
             # target label
+            enable_target = os.environ.get("ENABLETARGET", "False")
+            if not enable_target:
+                continue
             for k, v in tmp_container.labels.items():
                 if k.startwith("io.rancher.loadbalancer.target"):
                     tmp_location, tmp_tcp_port = MetadataRequest.process_target_label(
@@ -81,7 +86,7 @@ class MetadataRequest:
     @staticmethod
     def get_self_host():
         try:
-            res = requests.get(url="http://rancher-metadata/2015-07-25/self/host",
+            res = requests.get(url="http://rancher-metadata/latest/self/host",
                                headers={"Accept": "application/json"},
                                timeout=3)
         except requests.HTTPError:
@@ -97,7 +102,7 @@ class MetadataRequest:
         res = res.json()
         try:
             if res["code"] == 404:
-                print("Metadata error")
+                print("Metadata error, cannot get host")
                 return None
         except KeyError:
             pass
@@ -135,9 +140,58 @@ class MetadataRequest:
                 tcp_port.append(tmp_port+":"+tmp_port)
             else:
                 tcp_port.append(routing_path+":"+routing_path)
-        print(location)
-        print(tcp_port)
         return location, tcp_port
+
+    @staticmethod
+    def get_consul_client(name):
+        try:
+            res = requests.get(url="http://rancher-metadata/latest/services/"+name,
+                               headers={"Accept": "application/json"},
+                               timeout=3)
+        except requests.HTTPError:
+            print("HTTPError: get_consul_client")
+            return None
+        except requests.ConnectionError:
+            print("ConnectionError: get_consul_client")
+            return None
+        except requests.Timeout:
+            print("Timeout: get_consul_client")
+            return None
+
+        res = res.json()
+        try:
+            if res["code"] == 404:
+                print("Metadata error, cannot find consul client")
+                return None
+        except KeyError:
+            pass
+        except TypeError:
+            pass
+
+        consul_client = service.Service()
+        consul_client.name = res['name']
+        consul_client.stack_name = res['stack_name']
+        consul_client.labels = res['labels']
+        try:
+            for loc in consul_client.labels["location"].split(","):
+                consul_client.locations.append(loc)
+        except KeyError:
+            pass
+
+        if consul_client.stack_name and consul_client.name:
+            if consul_client.locations:
+                return consul_client
+            else:
+                print("no location label, ignored")
+                return None
+        else:
+            print("cannot find valid consul client")
+            return None
+
+
+
+
+
 
 
 

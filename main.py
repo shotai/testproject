@@ -6,9 +6,7 @@ import consulrequest
 import metadatarequest
 
 
-def start_host_container_agent_register():
-    curr_registered_services = []
-    sleep_time = os.environ.get("TIME", "10")
+def initial_consul():
     enable_acl = os.environ.get("ENABLEACL", "True")
     if enable_acl == "True":
         with open("client_acl_token.json") as acl:
@@ -27,6 +25,16 @@ def start_host_container_agent_register():
         return
     if not str.startswith(consul_url, "http://"):
         consul_url = "http://"+consul_url + ":8500"
+    return consul_url, consul_token, register_host
+
+
+def start_host_container_agent_register():
+    curr_registered_services = []
+    sleep_time = os.environ.get("TIME", "10")
+    consul_url, consul_token, register_host = initial_consul()
+    consul_client = metadatarequest.MetadataRequest.get_consul_client(os.environ.get("CONSULCLIENT", "consulclient"))
+    if consul_client:
+        consulrequest.ConsulRequest.register_consul_client(consul_client, register_host, consul_url, consul_token)
 
     while True:
         register_containers = []

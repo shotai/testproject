@@ -14,6 +14,6 @@ class Container:
         self.lb_locations = []
 
     def print_container(self):
-        print("CONTAINER: " + self.name + " host: " + self.hostname + " stack_name: " + self.stack_name
-              + " create_index: " + str(self.create_index))
+        print("CONTAINER: " + self.name + " host: " + self.hostname + " stack_name: " + self.stack_name +
+              " create_index: " + str(self.create_index))
 
