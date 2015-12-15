@@ -1,5 +1,5 @@
 FROM python:latest
 
-COPY *.py ./registersrc/
+COPY . /registersrc
 RUN pip install requests
-CMD python3 ./registersrc/main.py
+CMD python3 /registersrc/main.py
