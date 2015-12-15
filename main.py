@@ -9,7 +9,7 @@ import metadatarequest
 def initial_consul():
     enable_acl = os.environ.get("ENABLEACL", "True")
     if enable_acl == "True":
-        with open("client_acl_token.json") as acl:
+        with open("/registersrc/client_acl_token.json") as acl:
             acl_token = json.load(acl)
             consul_token = acl_token["ID"]
     else:
