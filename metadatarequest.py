@@ -45,6 +45,7 @@ class MetadataRequest:
             tmp_container.ips = i['ips']
             tmp_container.host_uuid = i['host_uuid']
 
+            # normal containers
             # tcp port
             try:
                 for prt in tmp_container.labels["tcpport"].split(","):
@@ -52,30 +53,34 @@ class MetadataRequest:
             except KeyError:
                 pass
 
-            # normal location
+            # location
             try:
                 for loc in tmp_container.labels["location"].split(","):
                     tmp_container.locations.append(loc)
             except KeyError:
                 pass
 
-            # load balancer location
+            # load balancer
+            # lblocation
             try:
                 for loc in tmp_container.labels["lblocation"].split(","):
                     tmp_container.lb_locations.append(loc)
             except KeyError:
                 pass
 
-            # target label
-            enable_target = os.environ.get("ENABLETARGET", "False")
+            # target/ports
+            enable_target = os.environ.get("LOADBALANCER", "False")
             if enable_target == "True":
                 for k, v in tmp_container.labels.items():
-                    if k.startswith("io.rancher.loadbalancer.target"):
-                        tmp_location, tmp_tcp_port = MetadataRequest.process_target_label(
-                            v, tmp_container.ports[0].split(":")[0])
-                        tmp_container.lb_locations.extend(tmp_location)
+                    if k == "io.rancher.container.agent.role" and v == "LoadBalancerAgent":
+                        tmp_tcp_port, default_http_port = MetadataRequest.process_load_balancer_port(
+                            tmp_container.service_name)
                         tmp_container.tcp_ports.extend(tmp_tcp_port)
+                        if k.startswith("io.rancher.loadbalancer.target"):
+                            tmp_location = MetadataRequest.process_target_label(v, default_http_port)
+                            tmp_container.lb_locations.extend(tmp_location)
 
+            # return
             if tmp_container.stack_name and tmp_container.service_name \
                     and (tmp_container.tcp_ports or tmp_container.locations or tmp_container.lb_locations):
                 tmp_containers.append(tmp_container)
@@ -116,30 +121,68 @@ class MetadataRequest:
         return tmp_host
 
     @staticmethod
-    def process_target_label(target, port):
+    def process_target_label(target, default_http_port):
         location = []
-        tcp_port = []
         for t in target.split(","):
             routing_path = t.split("=")[0]
-            if ":" in routing_path and "/" in routing_path:
+            if ":" in routing_path and "/" in routing_path:  # -- test.com:3000/v1=3001
                 tmp_loc = routing_path.split(":")[1]
                 tmp_port = tmp_loc.split("/")[0]
                 tmp_location = tmp_loc.lstrip(tmp_port)
                 location.append(tmp_port+":"+tmp_port+":"+tmp_location)
-            elif "/" in routing_path:
+            elif "/" in routing_path:  # -- 3000/v1=3001
                 tmp_port = routing_path.split("/")[0]
                 if tmp_port.isdigit():
                     tmp_location = routing_path.lstrip(tmp_port)
                 else:
-                    tmp_port = port
+                    if not default_http_port:
+                        continue
+                    tmp_port = default_http_port
                     tmp_location = routing_path
                 location.append(tmp_port+":"+tmp_port+":"+tmp_location)
-            elif ":" in routing_path:  # the rule without path will be treated as tcp port
+            elif ":" in routing_path:  # -- test.com:3000=3001
                 tmp_port = routing_path.split(":")[1]
-                tcp_port.append(tmp_port+":"+tmp_port)
-            else:
-                tcp_port.append(routing_path+":"+routing_path)
-        return location, tcp_port
+                location.append(tmp_port+":"+tmp_port+":/")
+            else:  # -- 3000=3001
+                location.append(routing_path+":"+routing_path + ":/")
+        return location
+
+    @staticmethod
+    def process_load_balancer_port(name):
+        try:
+            res = requests.get(url="http://rancher-metadata/latest/services/"+name,
+                               headers={"Accept": "application/json"},
+                               timeout=3)
+        except requests.HTTPError:
+            print("HTTPError: get_load_balancer")
+            return []
+        except requests.ConnectionError:
+            print("ConnectionError: get_load_balancer")
+            return []
+        except requests.Timeout:
+            print("Timeout: get_load_balancer")
+            return []
+
+        res = res.json()
+        try:
+            if res["code"] == 404:
+                print("Metadata error, cannot find load balancer")
+                return []
+        except KeyError:
+            pass
+        except TypeError:
+            pass
+
+        ret = []
+        default_http_port = None
+        for p in res["ports"]:
+            tmp = p.split("/")
+            if len(tmp) == 2 and tmp[1].lower() == "tcp":
+                ret.append(tmp[0])
+            elif len(tmp) == 1 and not default_http_port:
+                default_http_port = tmp.split(":")[0]
+
+        return ret, default_http_port
 
     @staticmethod
     def get_consul_client(name):
@@ -186,6 +229,16 @@ class MetadataRequest:
         else:
             print("cannot find valid consul client")
             return None
+
+
+
+
+
+
+
+
+
+
 
 
 
