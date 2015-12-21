@@ -70,15 +70,14 @@ class MetadataRequest:
 
             # target/ports
             enable_target = os.environ.get("LOADBALANCER", "False")
+            default_http_port = None
             if enable_target == "True":
                 for k, v in tmp_container.labels.items():
                     if k == "io.rancher.container.agent.role" and v == "LoadBalancerAgent":
                         tmp_tcp_port, default_http_port = MetadataRequest.process_load_balancer_port(
                             tmp_container.service_name)
                         tmp_container.tcp_ports.extend(tmp_tcp_port)
-                    else:
-                        continue
-                    if k.startswith("io.rancher.loadbalancer.target"):
+                    elif k.startswith("io.rancher.loadbalancer.target"):
                         tmp_location = MetadataRequest.process_target_label(v, default_http_port)
                         tmp_container.lb_locations.extend(tmp_location)
 
