@@ -180,7 +180,7 @@ class MetadataRequest:
             if len(tmp) == 2 and tmp[1].lower() == "tcp":
                 ret.append(tmp[0])
             elif len(tmp) == 1 and not default_http_port:
-                default_http_port = tmp.split(":")[0]
+                default_http_port = tmp[0].split(":")[0]
 
         return ret, default_http_port
 

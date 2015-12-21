@@ -52,7 +52,6 @@ class ConsulRequest:
         url = consul_url + "/v1/agent/service/register"
         if consul_token:
             url += "?token=" + consul_token
-        print(url)
         for payload in payloads:
             try:
                 r = requests.post(url, json=payload, timeout=3)
