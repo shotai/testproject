@@ -76,9 +76,11 @@ class MetadataRequest:
                         tmp_tcp_port, default_http_port = MetadataRequest.process_load_balancer_port(
                             tmp_container.service_name)
                         tmp_container.tcp_ports.extend(tmp_tcp_port)
-                        if k.startswith("io.rancher.loadbalancer.target"):
-                            tmp_location = MetadataRequest.process_target_label(v, default_http_port)
-                            tmp_container.lb_locations.extend(tmp_location)
+                    else:
+                        continue
+                    if k.startswith("io.rancher.loadbalancer.target"):
+                        tmp_location = MetadataRequest.process_target_label(v, default_http_port)
+                        tmp_container.lb_locations.extend(tmp_location)
 
             # return
             if tmp_container.stack_name and tmp_container.service_name \
