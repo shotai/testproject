@@ -78,7 +78,7 @@ class ConsulRequest:
                 print("Bad tcpport format: " + i)
                 continue
             tmp = {
-                "ID": container.name + "-" + i,
+                "ID": (container.name + "-" + i).replace(":", "-"),
                 "Name": container.stack_name+'-'+container.service_name,
                 "Tags": ["tcpport:"+p[0]],
                 "Address": host.agent_ip,
