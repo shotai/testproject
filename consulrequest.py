@@ -48,7 +48,7 @@ class ConsulRequest:
     @staticmethod
     def register_consul_client(service, host, consul_url, consul_token=None):
         payloads = ConsulRequest.generate_location_payload(False, False, service.locations, service.stack_name,
-                                                           service.name, host.name, host, host.agent_ip, [])
+                                                           service.name, host.name, host, host.agent_ip)
         url = consul_url + "/v1/agent/service/register"
         if consul_token:
             url += "?token=" + consul_token
@@ -74,7 +74,7 @@ class ConsulRequest:
         for i in container.tcp_ports:
             ports = i.replace("tcpport:", "")
             p = ports.split(":")
-            if len(p) != 2:
+            if len(p) < 2:
                 print("Bad tcpport format: " + i)
                 continue
             tmp = {
@@ -84,19 +84,25 @@ class ConsulRequest:
                 "Address": host.agent_ip,
                 "Port": int(p[0])
             }
+            try:
+                for sp in p[2:]:
+                    tmp["Tags"].append(sp)
+            except IndexError:
+                pass
+
             payloads.append(tmp)
 
         # container payload
         payloads.extend(ConsulRequest.generate_location_payload(container.is_lb, True, container.locations,
                                                                 container.stack_name, container.service_name,
                                                                 container.name, host, container.ips[0],
-                                                                container.special_tag))
+                                                                ))
 
         return payloads
 
     @staticmethod
     def generate_location_payload(is_lb, health_check, location, stack_name, service_name, name, host,
-                                  rancher_ip, special_tag):
+                                  rancher_ip):
         payloads = []
         for i in location:
             tmp = {
@@ -105,7 +111,7 @@ class ConsulRequest:
             }
             loc = i.replace("loc:", "")
             provide_location = loc.split(":")
-            if len(provide_location) != 3 and len(provide_location) != 4:
+            if len(provide_location) < 3:
                 print("Bad location format: " + i)
                 continue
             public_port = provide_location[0]
@@ -113,15 +119,14 @@ class ConsulRequest:
             loc = provide_location[2]
             try:
                 path = provide_location[3]
+                for sp in provide_location[4:]:
+                    tmp["Tags"].append(sp)
             except IndexError:
                 path = None
                 pass
             tmp["Port"] = int(public_port)
             tmp["ID"] = (name + '-' + public_port + '-' + loc).replace("/", "-")
             tmp["Tags"] = ["loc:"+loc] if not path else ["loc:"+loc, "path:" + path]
-
-            for sp in special_tag:
-                tmp["Tags"].append(','+sp)
 
             if is_lb and health_check:
                 tmp["Check"] = {

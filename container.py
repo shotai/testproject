@@ -12,7 +12,6 @@ class Container:
         self.tcp_ports = []
         self.locations = []
         self.is_lb = False
-        self.special_tag = []
 
     def print_container(self):
         print("CONTAINER: " + self.name + " host: " + self.hostname + " stack_name: " + self.stack_name +
