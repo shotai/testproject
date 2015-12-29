@@ -48,7 +48,7 @@ class ConsulRequest:
     @staticmethod
     def register_consul_client(service, host, consul_url, consul_token=None):
         payloads = ConsulRequest.generate_location_payload(False, False, service.locations, service.stack_name,
-                                                           service.name, host.name, host, host.agent_ip)
+                                                           service.name, host.name, host, host.agent_ip, [])
         url = consul_url + "/v1/agent/service/register"
         if consul_token:
             url += "?token=" + consul_token
@@ -89,12 +89,14 @@ class ConsulRequest:
         # container payload
         payloads.extend(ConsulRequest.generate_location_payload(container.is_lb, True, container.locations,
                                                                 container.stack_name, container.service_name,
-                                                                container.name, host, container.ips[0]))
+                                                                container.name, host, container.ips[0],
+                                                                container.special_tag))
 
         return payloads
 
     @staticmethod
-    def generate_location_payload(is_lb, health_check, location, stack_name, service_name, name, host, rancher_ip):
+    def generate_location_payload(is_lb, health_check, location, stack_name, service_name, name, host,
+                                  rancher_ip, special_tag):
         payloads = []
         for i in location:
             tmp = {
@@ -117,6 +119,10 @@ class ConsulRequest:
             tmp["Port"] = int(public_port)
             tmp["ID"] = (name + '-' + public_port + '-' + loc).replace("/", "-")
             tmp["Tags"] = ["loc:"+loc] if not path else ["loc:"+loc, "path:" + path]
+
+            for sp in special_tag:
+                tmp["Tags"].append(','+sp)
+
             if is_lb and health_check:
                 tmp["Check"] = {
                     "HTTP": "http://"+rancher_ip+":"+public_port+loc,
