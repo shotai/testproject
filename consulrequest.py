@@ -107,7 +107,8 @@ class ConsulRequest:
         for i in location:
             tmp = {
                 "Name": stack_name+'-' + service_name,
-                "Address": host.agent_ip
+                "Address": host.agent_ip,
+                "Tags": []
             }
             loc = i.replace("loc:", "")
             provide_location = loc.split(":")
@@ -119,14 +120,18 @@ class ConsulRequest:
             loc = provide_location[2]
             try:
                 path = provide_location[3]
+                if path:
+                    tmp["Tags"].append("path:"+path)
                 for sp in provide_location[4:]:
                     tmp["Tags"].append(sp)
             except IndexError:
-                path = None
                 pass
+            
             tmp["Port"] = int(public_port)
             tmp["ID"] = (name + '-' + public_port + '-' + loc).replace("/", "-")
-            tmp["Tags"] = ["loc:"+loc] if not path else ["loc:"+loc, "path:" + path]
+            tmp["Tags"].apend("loc:"+loc)
+
+
 
             if is_lb and health_check:
                 tmp["Check"] = {
