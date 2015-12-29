@@ -87,22 +87,18 @@ class ConsulRequest:
             payloads.append(tmp)
 
         # container payload
-        payloads.extend(ConsulRequest.generate_location_payload(False, True, container.locations,
+        payloads.extend(ConsulRequest.generate_location_payload(container.is_lb, True, container.locations,
                                                                 container.stack_name, container.service_name,
                                                                 container.name, host, container.ips[0]))
 
-        # load balancer payload
-        payloads.extend(ConsulRequest.generate_location_payload(True, True, container.lb_locations,
-                                                                container.stack_name, container.service_name,
-                                                                container.name, host, container.ips[0]))
         return payloads
 
     @staticmethod
-    def generate_location_payload(use_lb, health_check, locations, stack_name, service_name, name, host, primary_ip):
+    def generate_location_payload(is_lb, health_check, location, stack_name, service_name, name, host, rancher_ip):
         payloads = []
-        for i in locations:
+        for i in location:
             tmp = {
-                "Name": stack_name+'-'+service_name,
+                "Name": stack_name+'-' + service_name,
                 "Address": host.agent_ip
             }
             loc = i.replace("loc:", "")
@@ -121,14 +117,14 @@ class ConsulRequest:
             tmp["Port"] = int(public_port)
             tmp["ID"] = (name + '-' + public_port + '-' + loc).replace("/", "-")
             tmp["Tags"] = ["loc:"+loc] if not path else ["loc:"+loc, "path:" + path]
-            if use_lb and health_check:
+            if is_lb and health_check:
                 tmp["Check"] = {
-                    "HTTP": "http://"+primary_ip+":"+public_port+loc,
+                    "HTTP": "http://"+rancher_ip+":"+public_port+loc,
                     "Interval": "10s"
                 }
             elif health_check:
                 tmp["Check"] = {
-                    "HTTP": "http://"+primary_ip+":"+private_port+loc,
+                    "HTTP": "http://"+rancher_ip+":"+private_port+loc,
                     "Interval": "10s"
                 }
             payloads.append(tmp)

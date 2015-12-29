@@ -45,7 +45,6 @@ class MetadataRequest:
             tmp_container.ips = i['ips']
             tmp_container.host_uuid = i['host_uuid']
 
-            # normal containers
             # tcp port
             try:
                 for prt in tmp_container.labels["tcpport"].split(","):
@@ -60,30 +59,33 @@ class MetadataRequest:
             except KeyError:
                 pass
 
-            # load balancer
-            # lblocation
-            try:
-                for loc in tmp_container.labels["lblocation"].split(","):
-                    tmp_container.lb_locations.append(loc)
-            except KeyError:
-                pass
-
-            # target/ports
-            enable_target = os.environ.get("LOADBALANCER", "False")
+            # load balancer labels
             default_http_port = None
-            if enable_target == "True":
-                for k, v in tmp_container.labels.items():
-                    if k == "io.rancher.container.agent.role" and v == "LoadBalancerAgent":
+            enable_target = os.environ.get("LOADBALANCER", "False")
+            for k, v in tmp_container.labels.items():
+                if k == "io.rancher.container.agent.role" and v == "LoadBalancerAgent":
+                    tmp_container.is_lb = True
+                    if enable_target == "True":
                         tmp_tcp_port, default_http_port = MetadataRequest.process_load_balancer_port(
                             tmp_container.service_name)
                         tmp_container.tcp_ports.extend(tmp_tcp_port)
-                    elif k.startswith("io.rancher.loadbalancer.target"):
-                        tmp_location = MetadataRequest.process_target_label(v, default_http_port)
-                        tmp_container.lb_locations.extend(tmp_location)
+                elif k.startswith("io.rancher.loadbalancer.target") and enable_target == "True":
+                    tmp_location = MetadataRequest.process_target_label(v, default_http_port)
+                    tmp_container.locations.extend(tmp_location)
+
+
+            # load balancer
+            # lblocation
+            # try:
+            #     for loc in tmp_container.labels["lblocation"].split(","):
+            #         tmp_container.lb_locations.append(loc)
+            # except KeyError:
+            #     pass
+
 
             # return
             if tmp_container.stack_name and tmp_container.service_name \
-                    and (tmp_container.tcp_ports or tmp_container.locations or tmp_container.lb_locations):
+                    and (tmp_container.tcp_ports or tmp_container.locations):
                 tmp_containers.append(tmp_container)
 
         return tmp_containers
@@ -126,12 +128,12 @@ class MetadataRequest:
         location = []
         for t in target.split(","):
             routing_path = t.split("=")[0]
-            if ":" in routing_path and "/" in routing_path:  # -- test.com:3000/v1=3001
+            if ":" in routing_path and "/" in routing_path:  # -- test.com:3000/v1=3001 -> 3000:3000:/v1
                 tmp_loc = routing_path.split(":")[1]
                 tmp_port = tmp_loc.split("/")[0]
                 tmp_location = tmp_loc.lstrip(tmp_port)
                 location.append(tmp_port+":"+tmp_port+":"+tmp_location)
-            elif "/" in routing_path:  # -- 3000/v1=3001
+            elif "/" in routing_path:  # -- 3000/v1=3001 -> 3000:3000:/v1
                 tmp_port = routing_path.split("/")[0]
                 if tmp_port.isdigit():
                     tmp_location = routing_path.lstrip(tmp_port)
@@ -141,10 +143,10 @@ class MetadataRequest:
                     tmp_port = default_http_port
                     tmp_location = routing_path
                 location.append(tmp_port+":"+tmp_port+":"+tmp_location)
-            elif ":" in routing_path:  # -- test.com:3000=3001
+            elif ":" in routing_path:  # -- test.com:3000=3001 -> 3000:3000:/
                 tmp_port = routing_path.split(":")[1]
                 location.append(tmp_port+":"+tmp_port+":/")
-            else:  # -- 3000=3001
+            else:  # -- 3000=3001 -> 3000:3000:/
                 location.append(routing_path+":"+routing_path + ":/")
         return location
 

@@ -11,7 +11,7 @@ class Container:
         self.host_uuid = ""
         self.tcp_ports = []
         self.locations = []
-        self.lb_locations = []
+        self.is_lb = False
 
     def print_container(self):
         print("CONTAINER: " + self.name + " host: " + self.hostname + " stack_name: " + self.stack_name +
