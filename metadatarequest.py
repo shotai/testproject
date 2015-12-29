@@ -73,15 +73,6 @@ class MetadataRequest:
                     tmp_location = MetadataRequest.process_target_label(v, default_http_port)
                     tmp_container.locations.extend(tmp_location)
 
-            # location
-            try:
-                if tmp_container.labels["local"] == "True":
-                    tmp_container.special_tag.append("local")
-                if tmp_container.labels["color"]:
-                    tmp_container.special_tag.append(tmp_container.labels["color"])
-            except KeyError:
-                pass
-
             # return
             if tmp_container.stack_name and tmp_container.service_name \
                     and (tmp_container.tcp_ports or tmp_container.locations):
