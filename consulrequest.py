@@ -126,10 +126,10 @@ class ConsulRequest:
                     tmp["Tags"].append(sp)
             except IndexError:
                 pass
-            
+
             tmp["Port"] = int(public_port)
             tmp["ID"] = (name + '-' + public_port + '-' + loc).replace("/", "-")
-            tmp["Tags"].apend("loc:"+loc)
+            tmp["Tags"].append("loc:"+loc)
 
 
 
