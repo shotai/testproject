@@ -1,4 +1,5 @@
 import requests
+import os
 
 
 class ConsulRequest:
@@ -69,29 +70,31 @@ class ConsulRequest:
     @staticmethod
     def generate_container_payload(container, host):
         payloads = []
-
+        enable_tcp_register = os.environ.get("ENABLETCP", "False")
         # tcp payload
         for i in container.tcp_ports:
             ports = i.replace("tcpport:", "")
             p = ports.split(":")
             if len(p) < 2:
-                print("Bad tcpport format: " + i)
+                print("Bad tcpport format: " + i + ", ignored.")
                 continue
             tmp = {
                 "ID": (container.name + "-" + i).replace(":", "-"),
                 "Name": container.stack_name+'-'+container.service_name,
-                "Tags": ["tcpport:"+p[0]],
+                "Tags": [],
                 "Address": host.agent_ip,
                 "Port": int(p[0])
             }
+            if enable_tcp_register == "False":
+                tmp["Tags"].append("tcp:"+p[0]+":"+p[1])
+            elif enable_tcp_register == "True":
+                tmp["Tags"].append("tcpport:"+p[0])
             try:
                 for sp in p[2:]:
                     tmp["Tags"].append(sp)
             except IndexError:
                 pass
-
             payloads.append(tmp)
-
         # container payload
         payloads.extend(ConsulRequest.generate_location_payload(container.is_lb, True, container.locations,
                                                                 container.stack_name, container.service_name,
@@ -130,8 +133,6 @@ class ConsulRequest:
             tmp["Port"] = int(public_port)
             tmp["ID"] = (name + '-' + public_port + '-' + loc).replace("/", "-")
             tmp["Tags"].append("loc:"+loc)
-
-
 
             if is_lb and health_check:
                 tmp["Check"] = {

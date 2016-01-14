@@ -61,15 +61,15 @@ class MetadataRequest:
 
             # load balancer labels
             default_http_port = None
-            enable_target = os.environ.get("LOADBALANCER", "False")
+            enable_lb_register = os.environ.get("LOADBALANCER", "False")
             for k, v in tmp_container.labels.items():
                 if k == "io.rancher.container.agent.role" and v == "LoadBalancerAgent":
                     tmp_container.is_lb = True
-                    if enable_target == "True":
+                    if enable_lb_register == "True":
                         tmp_tcp_port, default_http_port = MetadataRequest.process_load_balancer_port(
                             tmp_container.service_name)
                         tmp_container.tcp_ports.extend(tmp_tcp_port)
-                elif k.startswith("io.rancher.loadbalancer.target") and enable_target == "True":
+                elif k.startswith("io.rancher.loadbalancer.target") and enable_lb_register == "True":
                     tmp_location = MetadataRequest.process_target_label(v, default_http_port)
                     tmp_container.locations.extend(tmp_location)
 
@@ -179,6 +179,8 @@ class MetadataRequest:
 
     @staticmethod
     def get_consul_client(name):
+        if not name:
+            return None
         try:
             res = requests.get(url="http://rancher-metadata/latest/services/"+name,
                                headers={"Accept": "application/json"},
@@ -196,7 +198,7 @@ class MetadataRequest:
         res = res.json()
         try:
             if res["code"] == 404:
-                print("Metadata error, cannot find consul client")
+                print("Cannot find " + name + ", Ignored.")
                 return None
         except KeyError:
             pass

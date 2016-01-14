@@ -36,7 +36,7 @@ def start_host_container_agent_register():
     curr_registered_services = []
     sleep_time = os.environ.get("TIME", "10")
     consul_url, consul_token, register_host = initial_consul()
-    consul_client = metadatarequest.MetadataRequest.get_consul_client(os.environ.get("CONSULCLIENT", "consulclient"))
+    consul_client = metadatarequest.MetadataRequest.get_consul_client(os.environ.get("CONSULCLIENT", ""))
     if consul_client:
         consulrequest.ConsulRequest.register_consul_client(consul_client, register_host, consul_url, consul_token)
 
@@ -60,7 +60,6 @@ def start_host_container_agent_register():
 
 
 def main():
-
     thread = Thread(target=start_host_container_agent_register)
     thread.start()
     thread.join()
