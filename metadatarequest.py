@@ -1,13 +1,12 @@
 import requests
 import host
 import container
-import os
 import service
 
 
 class MetadataRequest:
     @staticmethod
-    def get_all_register_containers():
+    def get_all_register_containers(config):
         try:
             res = requests.get(url="http://rancher-metadata/latest/containers",
                                headers={"Accept": "application/json"},
@@ -61,23 +60,21 @@ class MetadataRequest:
 
             # load balancer labels
             default_http_port = None
-            enable_lb_register = os.environ.get("LOADBALANCER", "False")
             for k, v in tmp_container.labels.items():
                 if k == "io.rancher.container.agent.role" and v == "LoadBalancerAgent":
                     tmp_container.is_lb = True
-                    if enable_lb_register == "True":
+                    if config.enable_lb_tcp_port:
+                        # process lb's tcp ports
                         tmp_tcp_port, default_http_port = MetadataRequest.process_load_balancer_port(
                             tmp_container.service_name)
                         tmp_container.tcp_ports.extend(tmp_tcp_port)
-                elif k.startswith("io.rancher.loadbalancer.target") and enable_lb_register == "True":
+                elif k.startswith("io.rancher.loadbalancer.target") and config.enable_lb_target:
                     tmp_location = MetadataRequest.process_target_label(v, default_http_port)
                     tmp_container.locations.extend(tmp_location)
 
-            # return
             if tmp_container.stack_name and tmp_container.service_name \
                     and (tmp_container.tcp_ports or tmp_container.locations):
                 tmp_containers.append(tmp_container)
-
         return tmp_containers
 
     @staticmethod
@@ -110,7 +107,6 @@ class MetadataRequest:
         tmp_host.agent_ip = res["agent_ip"]
         tmp_host.name = res['name']
         tmp_host.uuid = res["uuid"]
-        tmp_host.print_host()
         return tmp_host
 
     @staticmethod

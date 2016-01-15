@@ -7,4 +7,6 @@ class Host:
         self.uuid = ""
 
     def print_host(self):
-        print("HOST: " + self.agent_ip + " NAME: "+self.name + " uuid: " + self.uuid)
+        print("HOST: " + self.agent_ip + "\n" +
+              "NAME: "+self.name + "\n" +
+              "uuid: " + self.uuid)

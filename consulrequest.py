@@ -1,12 +1,11 @@
 import requests
-import os
 
 
 class ConsulRequest:
     @staticmethod
-    def agent_register_container(container, host, consul_url, registered_container, consul_token=None):
+    def agent_register_container(container, host, consul_url, registered_container, config, consul_token=None):
         container_ids = []
-        payloads = ConsulRequest.generate_container_payload(container, host)
+        payloads = ConsulRequest.generate_container_payload(container, host, config)
         url = consul_url + "/v1/agent/service/register"
         if consul_token:
             url += "?token=" + consul_token
@@ -68,13 +67,12 @@ class ConsulRequest:
                 continue
 
     @staticmethod
-    def generate_container_payload(container, host):
+    def generate_container_payload(container, host, config):
         payloads = []
-        enable_tcp_register = os.environ.get("ENABLETCP", "False")
+
         # tcp payload
         for i in container.tcp_ports:
-            ports = i.replace("tcpport:", "")
-            p = ports.split(":")
+            p = i.split(":")
             if len(p) < 2:
                 print("Bad tcpport format: " + i + ", ignored.")
                 continue
@@ -85,9 +83,9 @@ class ConsulRequest:
                 "Address": host.agent_ip,
                 "Port": int(p[0])
             }
-            if enable_tcp_register == "False":
+            if not config.enable_tcp:
                 tmp["Tags"].append("tcp:"+p[0]+":"+p[1])
-            elif enable_tcp_register == "True":
+            else:
                 tmp["Tags"].append("tcpport:"+p[0])
             try:
                 for sp in p[2:]:
@@ -95,6 +93,7 @@ class ConsulRequest:
             except IndexError:
                 pass
             payloads.append(tmp)
+
         # container payload
         payloads.extend(ConsulRequest.generate_location_payload(container.is_lb, True, container.locations,
                                                                 container.stack_name, container.service_name,
@@ -113,8 +112,8 @@ class ConsulRequest:
                 "Address": host.agent_ip,
                 "Tags": []
             }
-            loc = i.replace("loc:", "")
-            provide_location = loc.split(":")
+
+            provide_location = i.split(":")
             if len(provide_location) < 3:
                 print("Bad location format: " + i)
                 continue
