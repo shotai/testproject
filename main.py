@@ -80,7 +80,7 @@ def load_config(argv):
 
     # load config file
     tmp_config = configparser.ConfigParser()
-    tmp_config.read('./config.ini')
+    tmp_config.read('/registersrc/config.ini')
     try:
         for key in tmp_config["Registrator"]:
             if key == "enableacl":
