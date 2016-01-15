@@ -11,8 +11,8 @@ import configuration
 
 def initial_consul(config):
     """
-    :param config:  configuration
-    :return: consul_server_url, acl_token, host
+    :param config:  Configuration
+    :return: rtype: str, str, str
     """
     if config.enable_acl:
         try:
@@ -26,12 +26,15 @@ def initial_consul(config):
         consul_token = None
 
     register_host = metadatarequest.MetadataRequest.get_self_host()
-    if not register_host or not register_host.agent_ip:
-        print("Cannot get host information or ip")
+    if not register_host:
+        print("Cannot get host information")
         return
     register_host.print_host()
 
     if not config.consul_server:
+        if not register_host.agent_ip:
+            print("Cannot get consul server address")
+            return
         config.consul_server = register_host.agent_ip
 
     if not str.startswith(config.consul_server, "http://"):
@@ -42,7 +45,7 @@ def initial_consul(config):
 
 def start_host_container_agent_register(config):
     """
-    :param config: configuration
+    :param config: Configuration
     :return: None
     """
     curr_registered_services = []
@@ -73,8 +76,8 @@ def start_host_container_agent_register(config):
 
 def load_config(argv):
     """
-    :param argv: system input arg
-    :return: configuration
+    :param argv: str
+    :return: rtype: Configuration
     """
     config = configuration.Configuration()
 

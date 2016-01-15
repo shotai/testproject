@@ -4,6 +4,15 @@ import requests
 class ConsulRequest:
     @staticmethod
     def agent_register_container(container, host, consul_url, registered_container, config, consul_token=None):
+        """
+        :param container: Container
+        :param host: Host
+        :param consul_url: str
+        :param registered_container: List[str]
+        :param config: Configuration
+        :param consul_token: str
+        :return: List[str]
+        """
         container_ids = []
         payloads = ConsulRequest.generate_container_payload(container, host, config)
         url = consul_url + "/v1/agent/service/register"
@@ -28,7 +37,13 @@ class ConsulRequest:
         return container_ids
 
     @staticmethod
-    def agent_deregister_service(service_id, consul_url, consul_token):
+    def agent_deregister_service(service_id, consul_url, consul_token=None):
+        """
+        :param service_id: str
+        :param consul_url: str
+        :param consul_token: str
+        :return: None
+        """
         url = consul_url + "/v1/agent/service/deregister/"+service_id
         if consul_token:
             url += "?token=" + consul_token
@@ -47,6 +62,13 @@ class ConsulRequest:
 
     @staticmethod
     def register_consul_client(service, host, consul_url, consul_token=None):
+        """
+        :param service: Service
+        :param host: Host
+        :param consul_url: str
+        :param consul_token: str
+        :return: None
+        """
         payloads = ConsulRequest.generate_location_payload(False, False, service.locations, service.stack_name,
                                                            service.name, host.name, host, host.agent_ip)
         url = consul_url + "/v1/agent/service/register"
@@ -68,6 +90,12 @@ class ConsulRequest:
 
     @staticmethod
     def generate_container_payload(container, host, config):
+        """
+        :param container: Container
+        :param host: Host
+        :param config: Configuration
+        :return: List[dict]
+        """
         payloads = []
 
         # tcp payload
@@ -105,6 +133,17 @@ class ConsulRequest:
     @staticmethod
     def generate_location_payload(is_lb, health_check, location, stack_name, service_name, name, host,
                                   rancher_ip):
+        """
+        :param is_lb: Boolean
+        :param health_check: Boolean
+        :param location: str
+        :param stack_name: str
+        :param service_name: str
+        :param name: str
+        :param host: Host
+        :param rancher_ip: str
+        :return: rtype: List[dict]
+        """
         payloads = []
         for i in location:
             tmp = {

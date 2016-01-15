@@ -7,6 +7,10 @@ import service
 class MetadataRequest:
     @staticmethod
     def get_all_register_containers(config):
+        """
+        :param config: Configuration
+        :return: rtype: List[Container]
+        """
         try:
             res = requests.get(url="http://rancher-metadata/latest/containers",
                                headers={"Accept": "application/json"},
@@ -79,6 +83,9 @@ class MetadataRequest:
 
     @staticmethod
     def get_self_host():
+        """
+        :return: Host
+        """
         try:
             res = requests.get(url="http://rancher-metadata/latest/self/host",
                                headers={"Accept": "application/json"},
@@ -111,6 +118,11 @@ class MetadataRequest:
 
     @staticmethod
     def process_target_label(target, default_http_port):
+        """
+        :param target: str
+        :param default_http_port: str
+        :return: List[str]
+        """
         location = []
         for t in target.split(","):
             routing_path = t.split("=")[0]
@@ -138,6 +150,10 @@ class MetadataRequest:
 
     @staticmethod
     def process_load_balancer_port(name):
+        """
+        :param name: str
+        :return: List[str], str
+        """
         try:
             res = requests.get(url="http://rancher-metadata/latest/services/"+name,
                                headers={"Accept": "application/json"},
@@ -175,6 +191,10 @@ class MetadataRequest:
 
     @staticmethod
     def get_consul_client(name):
+        """
+        :param name: str
+        :return: Service
+        """
         if not name:
             return None
         try:
