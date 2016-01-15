@@ -80,7 +80,7 @@ def load_config(argv):
 
     # load config file
     tmp_config = configparser.ConfigParser()
-    tmp_config.read('./config.ini')
+    tmp_config.read('/registersrc/config.ini')
     try:
         for key in tmp_config["Registrator"]:
             if key == "enableacl":
@@ -108,7 +108,7 @@ def load_config(argv):
         print('-a/--acl                                     enable acl \n'
               '-t/--tcp                                     enable tcp register with nginx-defined tag (tcpport) \n'
               '-l/--lbtarget                                enable register with loadbalancer target label \n'
-              '-p/--lbport                                  enable register with loadbalancer ports(ports have /tcp)\n'
+              '-p/--lbport                                  enable register with loadbalancer ports which have /tcp)\n'
               '-w/--wait <wait_time>                        registrator loop sleep time \n'
               '-s/--consulserver <consul_server_address>    consul server address \n'
               '-c/--consulclient <consul_client_address>    consul client address \n')
