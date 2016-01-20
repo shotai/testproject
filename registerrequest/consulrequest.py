@@ -12,12 +12,12 @@ class ConsulRequest:
             try:
                 if payload["ID"] not in registered_containers:
                     r = requests.post(url, json=payload, timeout=3)
-                    print("Register Container:      " + payload["ID"] + "\n"
+                    print("Register Service:        " + payload["ID"] + "\n"
                           "Service Name:            " + payload["Name"] + "\n"
                           "Port:                    " + str(payload["Port"]) + "\n"
                           "Address:                 " + payload["Address"] + "\n"
                           "Tags:                    " + ",".join(payload["Tags"]) + "\n"
-                          "Result:                  " + str(r.status_code))
+                          "Result:                  " + str(r.status_code) + "\n")
             except requests.HTTPError:
                 print("HTTPError: register container " + payload["ID"])
                 continue
@@ -37,7 +37,8 @@ class ConsulRequest:
             url += "?token=" + consul_token
         try:
             r = requests.post(url, timeout=3)
-            print("Agent Deregister Service: " + service_id + ", Result: " + str(r.status_code))
+            print("Deregister Service:  " + service_id + "\n"
+                  "Result:              " + str(r.status_code) + "\n")
         except requests.HTTPError:
             print("HTTPError: deregister service " + service_id)
             return

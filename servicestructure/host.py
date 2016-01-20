@@ -1,4 +1,3 @@
-# Host Class
 class Host:
     def __init__(self):
         self.agent_ip = ""
@@ -8,4 +7,7 @@ class Host:
         self.uuid = ""
 
     def print_host(self):
-        print("HOST: " + self.agent_ip + " NAME: "+self.name + " uuid: " + self.uuid)
+        print("HOST: " + self.agent_ip + "\n"
+              "NAME: " + self.name + "\n"
+              "IP:   " + self.agent_ip + "\n"
+              "UUID: " + self.uuid + "\n")
