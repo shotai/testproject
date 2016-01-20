@@ -69,7 +69,15 @@ class ServiceDataRegister:
                 path = provide_location[3]
                 if path:
                     tmp["Tags"].append("path:"+path)
-                for sp in provide_location[4:]:
+                enable_health_check = provide_location[4]
+                if enable_health_check.lower() == "true":
+                    health_check_addr = provide_location[5] if provide_location[5] else loc
+                    tmp["Check"] = self.__generate_http_health_check__(is_lb=curr_container.is_lb,
+                                                                       curr_ip=curr_container.ips[0],
+                                                                       public_port=public_port,
+                                                                       private_port=private_port,
+                                                                       health_check_addr=health_check_addr)
+                for sp in provide_location[6:]:
                     tmp["Tags"].append(sp)
             except IndexError:
                 pass
@@ -77,19 +85,22 @@ class ServiceDataRegister:
             tmp["Port"] = int(public_port)
             tmp["ID"] = (curr_container.name + '-' + public_port + '-' + loc).replace("/", "-")
             tmp["Tags"].append("loc:"+loc)
-
-            # if curr_container.is_lb and health_check:
-            #     tmp["Check"] = {
-            #         "HTTP": "http://" + curr_container.ips[0] + ":" + public_port + loc,
-            #         "Interval": "10s"
-            #     }
-            # elif health_check:
-            #     tmp["Check"] = {
-            #         "HTTP": "http://" + curr_container.ips[0] + ":" + private_port + loc,
-            #         "Interval": "10s"
-            #     }
             payloads.append(tmp)
         return payloads
+
+    def __generate_http_health_check__(self, is_lb, curr_ip, public_port, private_port, health_check_addr):
+        if is_lb:
+            health = {
+                "HTTP": "http://" + curr_ip + ":" + public_port + health_check_addr,
+                "Interval": "10s"
+            }
+        else:
+            health = {
+                "HTTP": "http://" + curr_ip + ":" + private_port + health_check_addr,
+                "Interval": "10s"
+            }
+        return health
+
 
 
 
