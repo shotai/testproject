@@ -39,8 +39,7 @@ class ServiceDataRegister:
                 "Name": curr_container.stack_name + '-' + curr_container.service_name,
                 "Tags": ["tcpport:"+p[0]],
                 "Address": self._host_ip,
-                "Port": int(p[0]),
-                "Check": {}
+                "Port": int(p[0])
             }
             try:
                 for sp in p[2:]:
@@ -56,8 +55,7 @@ class ServiceDataRegister:
             tmp = {
                 "Name": curr_container.stack_name + '-' + curr_container.service_name,
                 "Address": self._host_ip,
-                "Tags": [],
-                "Check": {}
+                "Tags": []
             }
             loc = i.replace("loc:", "")
             provide_location = loc.split(":")
