@@ -39,7 +39,8 @@ class ServiceDataRegister:
                 "Name": curr_container.stack_name + '-' + curr_container.service_name,
                 "Tags": ["tcpport:"+p[0]],
                 "Address": self._host_ip,
-                "Port": int(p[0])
+                "Port": int(p[0]),
+                "Check": {}
             }
             try:
                 for sp in p[2:]:
@@ -55,7 +56,8 @@ class ServiceDataRegister:
             tmp = {
                 "Name": curr_container.stack_name + '-' + curr_container.service_name,
                 "Address": self._host_ip,
-                "Tags": []
+                "Tags": [],
+                "Check": {}
             }
             loc = i.replace("loc:", "")
             provide_location = loc.split(":")
@@ -71,7 +73,8 @@ class ServiceDataRegister:
                     tmp["Tags"].append("path:"+path)
                 enable_health_check = provide_location[4]
                 if enable_health_check.lower() == "true":
-                    health_check_addr = provide_location[5] if provide_location[5] else loc
+                    health_check_addr = provide_location[5] if len(provide_location) > 5 \
+                                                               and provide_location[5] else loc
                     tmp["Check"] = self.__generate_http_health_check__(is_lb=curr_container.is_lb,
                                                                        curr_ip=curr_container.ips[0],
                                                                        public_port=public_port,

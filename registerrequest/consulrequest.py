@@ -12,7 +12,12 @@ class ConsulRequest:
             try:
                 if payload["ID"] not in registered_containers:
                     r = requests.post(url, json=payload, timeout=3)
-                    print("Agent Register Container: " + payload["ID"] + ", Result: " + str(r.status_code))
+                    print("Register Container:      " + payload["ID"] + "\n"
+                          "Service Name:            " + payload["Name"] + "\n"
+                          "Port:                    " + payload["Port"] + "\n"
+                          "Address:                 " + payload["Address"] + "\n"
+                          "Tags:                    " + payload["Tags"] + "\n"
+                          "Result:                  " + str(r.status_code))
             except requests.HTTPError:
                 print("HTTPError: register container " + payload["ID"])
                 continue

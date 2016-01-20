@@ -14,6 +14,8 @@ class MetaDataProcess:
         return self.__process_container_data__()
 
     def get_consul_client(self, name):
+        if not name:
+            return None
         self._res = metadatarequest.MetadataRequest.get_service_metadata(name)
         if not self._res:
             return None
