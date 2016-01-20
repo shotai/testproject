@@ -4,6 +4,10 @@ import requests
 class MetadataRequest:
     @staticmethod
     def get_all_containers_metadata():
+        """
+        Get containers metadata request, return response
+        :return: dict
+        """
         try:
             res = requests.get(url="http://rancher-metadata/latest/containers",
                                headers={"Accept": "application/json"},
@@ -32,6 +36,10 @@ class MetadataRequest:
 
     @staticmethod
     def get_self_host_metadata():
+        """
+        Get host metadata request, return response
+        :return: dict
+        """
         try:
             res = requests.get(url="http://rancher-metadata/latest/self/host",
                                headers={"Accept": "application/json"},
@@ -59,6 +67,11 @@ class MetadataRequest:
 
     @staticmethod
     def get_service_metadata(name):
+        """
+        Get service metadata request, return response
+        :param name: str
+        :return: dict
+        """
         try:
             res = requests.get(url="http://rancher-metadata/latest/services/"+name,
                                headers={"Accept": "application/json"},

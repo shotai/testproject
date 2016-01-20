@@ -8,26 +8,39 @@ class MetaDataProcess:
         self._res = {}
 
     def get_all_containers(self):
+        """
+        Get all containers, return all containers
+        :return: List[Container]
+        """
         self._res = metadatarequest.MetadataRequest.get_all_containers_metadata()
         if not self._res:
             return []
-        return self.__process_container_data__()
+        return self._process_container_data()
 
     def get_consul_client(self, name):
+        """
+        Get consul client service, return consul client service
+        :param name: str
+        :return: Service
+        """
         if not name:
             return None
         self._res = metadatarequest.MetadataRequest.get_service_metadata(name)
         if not self._res:
             return None
-        return self.__process_service_data__()
+        return self._process_service_data()
 
     def get_host(self):
+        """
+        Get host, return host
+        :return: Host
+        """
         self._res = metadatarequest.MetadataRequest.get_self_host_metadata()
         if not self._res:
             return None
-        return self.__process_host_data__()
+        return self._process_host_data()
 
-    def __process_host_data__(self):
+    def _process_host_data(self):
         tmp_host = host.Host()
         tmp_host.agent_ip = self._res["agent_ip"]
         tmp_host.name = self._res['name']
@@ -35,7 +48,7 @@ class MetaDataProcess:
         tmp_host.print_host()
         return tmp_host
 
-    def __process_service_data__(self):
+    def _process_service_data(self):
         tmp_service = service.Service()
         tmp_service.name = self._res['name']
         tmp_service.stack_name = self._res['stack_name']
@@ -56,7 +69,7 @@ class MetaDataProcess:
             print("cannot find service")
             return None
 
-    def __process_container_data__(self):
+    def _process_container_data(self):
         tmp_containers = []
         for i in self._res:
             tmp_container = container.Container()
@@ -91,7 +104,7 @@ class MetaDataProcess:
                 if tmp_container.labels["io.rancher.container.agent.role"] == "LoadBalancerAgent":
                     tmp_container.is_lb = True
                     if enable_target == "True":
-                        tmp_tcp_port, default_http_port = self.__process_load_balancer_ports__(
+                        tmp_tcp_port, default_http_port = self._process_load_balancer_ports(
                             tmp_container.service_name)
                         tmp_container.tcp_ports.extend(tmp_tcp_port)
             except KeyError:
@@ -100,7 +113,7 @@ class MetaDataProcess:
             if tmp_container.is_lb:
                 for k, v in tmp_container.labels.items():
                     if k.startswith("io.rancher.loadbalancer.target") and enable_target == "True":
-                        tmp_location = self.__process_target_label__(v, default_http_port)
+                        tmp_location = self._process_target_label(v, default_http_port)
                         tmp_container.locations.extend(tmp_location)
 
             if tmp_container.stack_name and tmp_container.service_name \
@@ -108,12 +121,7 @@ class MetaDataProcess:
                 tmp_containers.append(tmp_container)
         return tmp_containers
 
-    def __process_load_balancer_ports__(self, service_name):
-        """
-
-        :param service_name: str
-        :return: List[str], str
-        """
+    def _process_load_balancer_ports(self, service_name):
         ret = []
         res = metadatarequest.MetadataRequest.get_service_metadata(service_name)
         if not res:
@@ -127,7 +135,7 @@ class MetaDataProcess:
                 default_http_port = tmp[0].split(":")[0]
         return ret, default_http_port
 
-    def __process_target_label__(self, target, default_http_port):
+    def _process_target_label(self, target, default_http_port):
         location = []
         for t in target.split(","):
             routing_path = t.split("=")[0]

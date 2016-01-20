@@ -6,6 +6,10 @@ from dataprocess import metadataprocess, servicedataregister
 
 
 def initial_consul():
+    """
+    Initialization, return consul url, consul token, host
+    :return: str, str, Host
+    """
     enable_acl = os.environ.get("ENABLEACL", "True")
     if enable_acl == "True":
         try:
