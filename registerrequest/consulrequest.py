@@ -14,7 +14,7 @@ class ConsulRequest:
                     r = requests.post(url, json=payload, timeout=3)
                     print("Register Container:      " + payload["ID"] + "\n"
                           "Service Name:            " + payload["Name"] + "\n"
-                          "Port:                    " + payload["Port"] + "\n"
+                          "Port:                    " + str(payload["Port"]) + "\n"
                           "Address:                 " + payload["Address"] + "\n"
                           "Tags:                    " + payload["Tags"] + "\n"
                           "Result:                  " + str(r.status_code))
