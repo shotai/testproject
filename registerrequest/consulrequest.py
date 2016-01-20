@@ -6,11 +6,11 @@ class ConsulRequest:
     def agent_register_container(payloads, registered_containers, consul_url, consul_token=None):
         """
         Register request to consul, return registered service ids
-        :param payloads: List[dict]
-        :param registered_containers: List[str]
-        :param consul_url: str
-        :param consul_token: str
-        :return: List[str]
+        :type payloads: List[dict]
+        :type registered_containers: List[str]
+        :type consul_url: str
+        :type consul_token: str
+        :rtype: List[str]
         """
         container_ids = []
         url = consul_url + "/v1/agent/service/register"
@@ -25,7 +25,8 @@ class ConsulRequest:
                           "Port:                    " + str(payload["Port"]) + "\n"
                           "Address:                 " + payload["Address"] + "\n"
                           "Tags:                    " + ",".join(payload["Tags"]) + "\n"
-                          "Result:                  " + str(r.status_code) + "\n")
+                          "Result:                  " + str(r.status_code))
+                    print("Health Check:            " + payload["Check"]["HTTP"] + "\n")
             except requests.HTTPError:
                 print("HTTPError: register container " + payload["ID"])
                 continue
@@ -42,9 +43,9 @@ class ConsulRequest:
     def agent_deregister_contaienr(service_id, consul_url, consul_token):
         """
         Deregister service from consul
-        :param service_id: str
-        :param consul_url: str
-        :param consul_token: str
+        :type service_id: str
+        :type consul_url: str
+        :type consul_token: str
         """
         url = consul_url + "/v1/agent/service/deregister/"+service_id
         if consul_token:
