@@ -2,7 +2,6 @@ import json
 import os
 import time
 from threading import Thread
-from registerrequest import consulrequest
 from dataprocess import metadataprocess, servicedataregister
 
 
@@ -55,7 +54,7 @@ def start_host_container_agent_register():
                 register_containers.extend(service_register.register_containers(i, curr_registered_services))
         for n in curr_registered_services:
             if n not in register_containers:
-                consulrequest.ConsulRequest.agent_deregister_contaienr(n, consul_url, consul_token)
+                service_register.deregister_container(n)
 
         curr_registered_services = register_containers
         time.sleep(int(sleep_time))

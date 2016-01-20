@@ -27,6 +27,13 @@ class ServiceDataRegister:
                                                                     consul_token=self._consul_token,
                                                                     registered_containers=[])
 
+    def deregister_container(self, service_id):
+        if not service_id:
+            return
+        consulrequest.ConsulRequest.agent_deregister_contaienr(service_id=service_id,
+                                                               consul_url=self._consul_url,
+                                                               consul_token=self._consul_token)
+
     def __generate_tcp_payload__(self, curr_container):
         payloads = []
         for i in curr_container.tcp_ports:
