@@ -37,7 +37,7 @@ class ConsulRequest:
                 print("Timeout: register container " + payload["ID"])
                 continue
             except KeyError:
-                continue
+                pass
             container_ids.append(payload["ID"])
         return container_ids
 
