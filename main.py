@@ -43,7 +43,7 @@ def start_host_container_agent_register():
     service_register = servicedataregister.ServiceDataRegister(host_ip=register_host.agent_ip,
                                                                consul_url=consul_url,
                                                                consul_token=consul_token)
-    consul_client = data_process.get_consul_client(os.environ.get("CONSULCLIENT", "consulclient"))
+    consul_client = data_process.get_consul_client(os.environ.get("CONSULCLIENT", ""))
     if consul_client:
         service_register.register_consul_client(consul_client, register_host)
     while True:
