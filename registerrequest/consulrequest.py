@@ -20,13 +20,14 @@ class ConsulRequest:
             try:
                 if payload["ID"] not in registered_containers:
                     r = requests.post(url, json=payload, timeout=3)
-                    print("Register Service ID:     " + payload["ID"] + "\n"
+                    print("\n"
+                          "Register Service ID:     " + payload["ID"] + "\n"
                           "Service Name:            " + payload["Name"] + "\n"
                           "Port:                    " + str(payload["Port"]) + "\n"
                           "Address:                 " + payload["Address"] + "\n"
                           "Tags:                    " + ",".join(payload["Tags"]) + "\n"
-                          "Result:                  " + str(r.status_code) + "\n")
-                    print("Health Check:            " + payload["Check"]["HTTP"] + "\n")
+                          "Result:                  " + str(r.status_code))
+                    print("Health Check:            " + payload["Check"]["HTTP"])
             except requests.HTTPError:
                 print("HTTPError: register container " + payload["ID"])
                 continue
@@ -65,10 +66,3 @@ class ConsulRequest:
         except requests.Timeout:
             print("Timeout: deregister service " + service_id)
             return
-
-
-
-
-
-
-

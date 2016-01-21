@@ -129,10 +129,3 @@ class ServiceDataRegister:
                 "Interval": "10s"
             }
         return health
-
-
-
-
-
-
-

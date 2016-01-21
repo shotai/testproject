@@ -48,6 +48,7 @@ def start_host_container_agent_register(config):
     :return: None
     """
     curr_registered_services = []
+    config.print_config()
 
     data_process = metadataprocess.MetaDataProcess(enable_lb_target=config.enable_lb_target,
                                                    enable_lb_tcp_port=config.enable_lb_tcp_port)
