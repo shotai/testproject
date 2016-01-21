@@ -25,7 +25,7 @@ class ConsulRequest:
                           "Port:                    " + str(payload["Port"]) + "\n"
                           "Address:                 " + payload["Address"] + "\n"
                           "Tags:                    " + ",".join(payload["Tags"]) + "\n"
-                          "Result:                  " + str(r.status_code))
+                          "Result:                  " + str(r.status_code) + "\n")
                     print("Health Check:            " + payload["Check"]["HTTP"] + "\n")
             except requests.HTTPError:
                 print("HTTPError: register container " + payload["ID"])

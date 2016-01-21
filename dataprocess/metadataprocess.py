@@ -1,58 +1,58 @@
-import os
 from servicestructure import container, service, host
 from registerrequest import metadatarequest
 
 
 class MetaDataProcess:
-    def __init__(self):
-        self._res = {}
+    def __init__(self, enable_lb_target, enable_lb_tcp_port):
+        self._enable_lb_target = enable_lb_target
+        self._enable_lb_tcp_port = enable_lb_tcp_port
 
     def get_all_containers(self):
         """
         Get all containers, return all containers
-        :return: List[Container]
+        :rtype: List[Container]
         """
-        self._res = metadatarequest.MetadataRequest.get_all_containers_metadata()
-        if not self._res:
+        res = metadatarequest.MetadataRequest.get_all_containers_metadata()
+        if not res:
             return []
-        return self._process_container_data()
+        return self._process_container_data(res)
 
     def get_consul_client(self, name):
         """
         Get consul client service, return consul client service
-        :param name: str
-        :return: Service
+        :type name: str
+        :rtype: Service
         """
         if not name:
             return None
-        self._res = metadatarequest.MetadataRequest.get_service_metadata(name)
-        if not self._res:
+        res = metadatarequest.MetadataRequest.get_service_metadata(name)
+        if not res:
             return None
-        return self._process_service_data()
+        return self._process_service_data(res)
 
     def get_host(self):
         """
         Get host, return host
-        :return: Host
+        :rtype: Host
         """
-        self._res = metadatarequest.MetadataRequest.get_self_host_metadata()
-        if not self._res:
+        res = metadatarequest.MetadataRequest.get_self_host_metadata()
+        if not res:
             return None
-        return self._process_host_data()
+        return self._process_host_data(res)
 
-    def _process_host_data(self):
+    def _process_host_data(self, res):
         tmp_host = host.Host()
-        tmp_host.agent_ip = self._res["agent_ip"]
-        tmp_host.name = self._res['name']
-        tmp_host.uuid = self._res["uuid"]
+        tmp_host.agent_ip = res["agent_ip"]
+        tmp_host.name = res['name']
+        tmp_host.uuid = res["uuid"]
         tmp_host.print_host()
         return tmp_host
 
-    def _process_service_data(self):
+    def _process_service_data(self, res):
         tmp_service = service.Service()
-        tmp_service.name = self._res['name']
-        tmp_service.stack_name = self._res['stack_name']
-        tmp_service.labels = self._res['labels']
+        tmp_service.name = res['name']
+        tmp_service.stack_name = res['stack_name']
+        tmp_service.labels = res['labels']
         try:
             for loc in tmp_service.labels["eze.routing.registrator.http"].split(","):
                 tmp_service.locations.append(loc)
@@ -69,9 +69,9 @@ class MetaDataProcess:
             print("cannot find service")
             return None
 
-    def _process_container_data(self):
+    def _process_container_data(self, res):
         tmp_containers = []
-        for i in self._res:
+        for i in res:
             tmp_container = container.Container()
             tmp_container.create_index = i['create_index']
             tmp_container.hostname = i['hostname']
@@ -99,20 +99,19 @@ class MetaDataProcess:
 
             # load balancer labels
             default_http_port = None
-            enable_target = os.environ.get("LOADBALANCER", "False")
             try:
                 if tmp_container.labels["io.rancher.container.agent.role"] == "LoadBalancerAgent":
                     tmp_container.is_lb = True
-                    if enable_target == "True":
+                    if self._enable_lb_tcp_port:
                         tmp_tcp_port, default_http_port = self._process_load_balancer_ports(
                             tmp_container.service_name)
                         tmp_container.tcp_ports.extend(tmp_tcp_port)
             except KeyError:
                 pass
 
-            if tmp_container.is_lb:
+            if tmp_container.is_lb and self._enable_lb_target:
                 for k, v in tmp_container.labels.items():
-                    if k.startswith("io.rancher.loadbalancer.target") and enable_target == "True":
+                    if k.startswith("io.rancher.loadbalancer.target"):
                         tmp_location = self._process_target_label(v, default_http_port)
                         tmp_container.locations.extend(tmp_location)
 

@@ -6,7 +6,7 @@ class MetadataRequest:
     def get_all_containers_metadata():
         """
         Get containers metadata request, return response
-        :return: dict
+        :rtype: dict
         """
         try:
             res = requests.get(url="http://rancher-metadata/latest/containers",
@@ -38,7 +38,7 @@ class MetadataRequest:
     def get_self_host_metadata():
         """
         Get host metadata request, return response
-        :return: dict
+        :rtype: dict
         """
         try:
             res = requests.get(url="http://rancher-metadata/latest/self/host",
@@ -69,8 +69,8 @@ class MetadataRequest:
     def get_service_metadata(name):
         """
         Get service metadata request, return response
-        :param name: str
-        :return: dict
+        :type name: str
+        :rtype: dict
         """
         try:
             res = requests.get(url="http://rancher-metadata/latest/services/"+name,

@@ -3,17 +3,18 @@ from servicestructure import container
 
 
 class ServiceDataRegister:
-    def __init__(self, consul_url, host_ip, consul_token):
+    def __init__(self, consul_url, host_ip, consul_token, enable_tcp):
         self._consul_url = consul_url
         self._consul_token = consul_token
         self._host_ip = host_ip
+        self._enable_tcp = enable_tcp
 
     def register_containers(self, curr_container, registered_containers):
         """
         Register containers to consul, return registered service ids
-        :param curr_container: Container
-        :param registered_containers: List[str]
-        :return: List[str]
+        :type curr_container: Container
+        :type registered_containers: List[str]
+        :rtype: List[str]
         """
         payloads = self._generate_tcp_payload(curr_container)
         payloads.extend(self._generate_http_payload(curr_container))
@@ -23,9 +24,9 @@ class ServiceDataRegister:
     def register_consul_client(self, service, host):
         """
         Register consul client to consul, return registered service ids
-        :param service: Service
-        :param host: Host
-        :return: List[str]
+        :type service: Service
+        :type host: Host
+        :rtype: List[str]
         """
         tmp_container = container.Container()
         tmp_container.locations = service.locations
@@ -42,7 +43,7 @@ class ServiceDataRegister:
     def deregister_container(self, service_id):
         """
         Deregister service
-        :param service_id: str
+        :type service_id: str
         """
         if not service_id:
             return
@@ -60,10 +61,14 @@ class ServiceDataRegister:
             tmp = {
                 "ID": (curr_container.name + "-" + i).replace(":", "-"),
                 "Name": curr_container.stack_name + '-' + curr_container.service_name,
-                "Tags": ["tcpport:"+p[0]],
+                "Tags": [],
                 "Address": self._host_ip,
                 "Port": int(p[0])
             }
+            if self._enable_tcp:
+                tmp["Tags"].append("tcpport:"+p[0])
+            else:
+                tmp["Tags"].append("tcp:"+p[0]+":"+p[1])
             try:
                 for sp in p[2:]:
                     tmp["Tags"].append(sp)
